@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent VID | Production Studio</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --accent: #f43f5e;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        input[type="file"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--accent);
+            color: white;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .character-sync-box {
+            display: none; /* Shown after analysis */
+            margin-top: 1rem;
+        }
+
+        .sync-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #1e293b;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .status-bar {
+            margin-top: 2rem;
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .reveal-step {
+            display: block !important;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: var(--primary); }
+            50% { border-color: #fbbf24; }
+            100% { border-color: var(--primary); }
+        }
+
+        .log {
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #64748b;
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            background: #020617 !important;
+            border: 1px solid #1e293b;
+        }
+
+        /* --- VICTORY GLOW (v10.2) --- */
+        @keyframes celebration-pulse {
+            0% { box-shadow: 0 0 5px #fbbf24; filter: brightness(1); }
+            50% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); filter: brightness(1.2); }
+            100% { box-shadow: 0 0 5px #fbbf24; filter: brightness(1); }
+        }
+
+        .progress.victory {
+            background: linear-gradient(90deg, #fbbf24, #34d399) !important;
+            animation: celebration-pulse 2s infinite ease-in-out;
+        }
+
+        .summary-card {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-option:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .mode-option input[type="radio"]:checked + span {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* --- MODAL STYLING (v10.3.1) --- */
+        #modalOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            padding: 2.5rem;
+            border-radius: 2rem;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            animation: modal-slide 0.3s ease-out;
+        }
+
+        @keyframes modal-slide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- ACTIVITY LEDGER (v11.2) --- */
+        .history-container {
+            max-height: 280px;
+            overflow-y: auto;
+            border-radius: 0.75rem;
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.5);
+            margin-top: 1rem;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            text-align: left;
+        }
+
+        .history-table th {
+            position: sticky;
+            top: 0;
+            background: #1e293b;
+            padding: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #334155;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .history-table th:hover { background: #334155; color: var(--primary); }
+        .history-table td { padding: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        /* [v12.0] Marathon & Staging Dock Styles */
+        .staging-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .job-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .job-card:hover { border-color: var(--primary); }
+        .job-card.processing { border-color: #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.2); }
+        .job-card .job-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc; }
+        .job-card img { width: 100%; height: 60px; object-fit: cover; border-radius: 0.3rem; margin-bottom: 0.5rem; }
+        .status-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .status-pending { background: #334155; color: #94a3b8; }
+        /* [v12.0.4] Marathon UI Refinement */
+        .job-card.processing { 
+            border-color: #34d399; 
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.3); 
+            animation: border-glow 2s infinite;
+        }
+        @keyframes border-glow {
+            0% { border-color: #34d399; }
+            50% { border-color: #6366f1; }
+            100% { border-color: #34d399; }
+        }
+        .worker-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .lane-locked {
+            opacity: 0.6;
+            filter: grayscale(0.5);
+            border-style: dashed !important;
+        }
+
+        .worker-monitor {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) { .worker-monitor { grid-template-columns: 1fr; } }
+
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-progress { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-error { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+        .btn-tiny {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
+            background: #334155;
+            color: white;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-tiny:hover { background: var(--primary); transform: scale(1.05); }
+
+        /* --- WORKER IDLE / STANDBY STATE (v12.0.9) --- */
+        @keyframes standby-pulse {
+            0%, 100% { box-shadow: 0 0 6px rgba(52,211,153,0.2); border-color: #1e3a2f; }
+            50% { box-shadow: 0 0 18px rgba(52,211,153,0.5); border-color: #34d399; }
+        }
+        @keyframes standby-shimmer {
+            0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; }
+        }
+        .lane-standby {
+            animation: standby-pulse 2.5s infinite ease-in-out !important;
+            border-color: #34d399 !important;
+        }
+        .standby-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(90deg, #064e3b, #065f46);
+            color: #34d399;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            padding: 3px 8px;
+            border-radius: 99px;
+            border: 1px solid #34d399;
+            animation: standby-shimmer 2s infinite;
+        }
+        .standby-badge::before { content: '◉ '; font-size: 7px; }
+        .worker-idle-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #020617, #0f172a);
+        }
+        .worker-idle-screen .idle-icon { font-size: 1.6rem; }
+        .worker-idle-screen .idle-text { font-size: 0.6rem; color: #34d399; font-weight: 700; letter-spacing: 0.1em; }
+        .lane-locked { opacity: 0.6; filter: grayscale(0.5); }
+
+        .staging-container {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            min-height: 60px;
+        }
+
+        .job-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            width: 140px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .job-card img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .job-card.processing {
+            border-color: #6366f1;
+            box-shadow: 0 0 15px rgba(99,102,241,0.3);
+            animation: active-glow 2s infinite ease-in-out;
+        }
+
+        /* --- WORKER IDLE SCREEN (v12.1.4) --- */
+        .worker-idle-screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            z-index: 20;
+            color: #34d399;
+            text-align: center;
+        }
+        .idle-icon { font-size: 2rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 8px #34d399); }
+        .idle-text { font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #34d399; }
+        
+        .lane-standby {
+            border-color: #34d399 !important;
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+            animation: standby-pulse 4s infinite ease-in-out;
+        }
+        @keyframes standby-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(52, 211, 153, 0.1); }
+            50% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.3); }
+        }
+
+        @keyframes active-glow {
+            0%, 100% { box-shadow: 0 0 8px rgba(99,102,241,0.3); }
+            50% { box-shadow: 0 0 20px rgba(99,102,241,0.6); }
+        }
+
+        .job-title { font-size: 0.65rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .status-badge { font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 99px; }
+        .status-pending { background: rgba(100,116,139,0.3); color: #94a3b8; }
+        .status-processing { background: rgba(99,102,241,0.3); color: #818cf8; }
+        .worker-badge { background: #6366f1; color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 3px; }
+        
+        .btn-remove-job {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            background: rgba(0,0,0,0.5);
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .btn-remove-job:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .ledger-ref-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #334155;
+            background: #000;
+        }
+
+        /* --- FAIL DOCK (v12.0.9) --- */
+        .fail-dock-container {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            min-height: 50px;
+        }
+        .fail-card {
+            background: #0f172a;
+            border: 1px solid #7f1d1d;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            width: 140px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .fail-card::after {
+            content: '✗';
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 11px;
+            color: #f87171;
+            font-weight: 900;
+        }
+        .fail-card img {
+            width: 100%;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.4rem;
+            margin-bottom: 0.4rem;
+            opacity: 0.5;
+            filter: grayscale(0.4);
+        }
+        .fail-card .job-title { color: #f87171; }
+        .fail-timestamp { font-size: 0.55rem; color: #64748b; margin-top: 0.25rem; }
+        .btn-terminate {
+            background: linear-gradient(90deg, #7f1d1d, #991b1b);
+            color: #fca5a5;
+            border: 1px solid #f87171;
+            padding: 0.4rem;
+            font-size: 0.7rem;
+            flex: 1;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+        .btn-terminate:hover { background: #dc2626; color: #fff; transform: translateY(-1px); }
+
+        .lake-dock-container {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            min-height: 50px;
+        }
+
+        .lake-card {
+            background: #0f172a;
+            border: 1px solid #166534;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            width: 140px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lake-card::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 10px;
+            color: #34d399;
+            font-weight: 900;
+        }
+
+        .lake-card img {
+            width: 100%;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.4rem;
+            margin-bottom: 0.4rem;
+            opacity: 0.7;
+        }
+
+        .lake-card .job-title { color: #34d399; }
+        .lake-timestamp { font-size: 0.55rem; color: #64748b; margin-top: 0.25rem; }
+        .history-container::-webkit-scrollbar-track { background: transparent; }
+        .history-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .history-container::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body>
+    <!-- JSON Preview Modal (v12.2.1) -->
+    <div id="jsonPreviewOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 2rem;">
+        <div style="max-width: 900px; margin: 0 auto; background: #0f172a; border: 1px solid var(--primary); border-radius: 1rem; padding: 1.5rem; position: relative; box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 id="previewTitle" style="margin: 0; color: #fff; font-size: 1rem;">📄 Storyboard Preview</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-primary" onclick="copyJSON()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: #334155;">📋 Copy JSON</button>
+                    <button class="btn-danger" onclick="closeJSONPreview()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">✕ Close</button>
+                </div>
+            </div>
+            <pre id="jsonContent" style="background: #000; padding: 1rem; border-radius: 0.5rem; color: #34d399; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow-x: auto; max-height: 70vh; border: 1px solid #1e293b;"></pre>
+        </div>
+    </div>
+
+    <div id="modalOverlay" style="display: none;">
+        <div class="modal-card">
+            <h2 style="margin-top: 0; color: #fbbf24;">⚠️ Active Session Detected</h2>
+            <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">
+                A production process is already running. Would you like to resume monitoring or reset the entire stage?
+            </p>
+            <button class="btn-primary" onclick="resumeSession()" style="background: var(--primary); margin-bottom: 1rem;">🛰️ Resume Monitoring</button>
+            <button class="btn-danger" onclick="destructiveReset()" style="background: transparent; color: #f43f5e; border: 1px solid #f43f5e; margin: 0;">🔥 Destructive Reset</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Agent VID | Production Studio</h1>
+
+        <div class="section" style="border: 2px solid var(--primary);">
+            <span class="label">Step 0: Initial Setup</span>
+            <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem;"> 
+                You must connect your Google Flow account once before starting production.
+            </p>
+            <button class="btn-primary" onclick="connectAccount()" style="background: linear-gradient(90deg, #34d399, #10b981);">🔗 Connect Google Flow Account</button>
+            <div id="syncStatus" style="margin-top: 0.5rem; font-size: 0.8rem; color: #34d399;"></div>
+        </div>
+
+        <!-- Step 1: Upload Storyboard -->
+        <div class="section" id="uploadSection">
+            <span class="label">1. Upload Storyboard (Gemini JSON)</span>
+            <input type="file" id="storyboardFile" accept=".json">
+            <button class="btn-primary" onclick="analyzeStoryboard()">Confirm & Analyze</button>
+        </div>
+
+        <!-- Step 1.5: Reference Image (revealed after analysis) -->
+        <div id="referenceSection" class="section" style="display: none; border: 2px dashed var(--primary); background: rgba(99, 102, 241, 0.05); transition: all 0.3s ease;">
+            <span class="label">🌟 Step 1.5: Upload Starting Reference (Optional)</span>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.8rem;">
+                Set the starting visual for Scene 1 to ensure character consistency.
+            </p>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <label class="btn-primary" style="width: auto; background: #334155; padding: 0.5rem 1rem; font-size: 0.8rem; cursor: pointer;">
+                    📁 Choose Reference Image
+                    <input type="file" id="refImage" accept="image/*" onchange="uploadReference()" style="display: none;">
+                </label>
+                <div id="refPreview" style="display: none; position: relative;">
+                    <img id="previewImg" src="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem; border: 2px solid var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);">
+                    <div id="readyBadge" style="display: none; position: absolute; bottom: -5px; right: -5px; background: #34d399; color: #0f172a; font-size: 10px; padding: 2px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #0f172a;">READY</div>
+                </div>
+            </div>
+            <div id="uploadStatus" style="font-size: 0.85rem; color: #fbbf24; margin-top: 0.7rem; font-weight: 600;">
+                Waiting for reference...
+            </div>
+        </div>
+
+        <!-- Step 2: Production Strategy — revealed after analysis -->
+        <div id="mappingSection" class="section" style="display: none;">
+            <span class="label">2. Production Strategy & Insights</span>
+            <div id="summaryCard" class="summary-card">
+                <div id="summaryDetails" style="font-size: 0.9rem; color: #94a3b8; line-height: 1.6;">Analyzing sequence details...</div>
+            </div>
+            <!-- Control Switches -->
+            <div style="margin-top: 1rem; display: flex; gap: 1.5rem; background: #0f172a; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #f8fafc;">
+                    <input type="checkbox" id="watchMode" style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="watchMode">👁️ Watch Mode</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #f8fafc;">
+                    <input type="checkbox" id="surveillanceMode" checked style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="surveillanceMode">🛰️ Surveillance</label>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+                <span class="label" style="font-size: 0.8rem;">Ready to Stage?</span>
+                <button class="btn-primary" onclick="addToQueue()" style="background: linear-gradient(90deg, #6366f1, #4f46e5);">➕ Add to Staging Dock</button>
+            </div>
+        </div>
+
+        <!-- Staging Dock -->
+        <div id="marathonSection" class="section" style="border: 2px solid #334155; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="label" style="background: #334155; color: #94a3b8;">🚀 Staging Dock — Active Queue</span>
+                <button class="btn-primary" onclick="clearQueue()" style="background: #334155; width: auto; font-size: 0.7rem; padding: 0.3rem 0.7rem;">🧹 Clear Batch</button>
+            </div>
+            <div id="stagingQueue" class="staging-container"></div>
+        </div>
+
+        <!-- Lake Dock — completed productions -->
+        <div id="lakeDockSection" class="section" style="border: 2px solid #166534; display: none; background: rgba(16,185,129,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span class="label" style="background: #166534; color: #34d399;">🌊 Lake Dock — Completed Productions</span>
+                <span style="font-size: 0.65rem; color: #64748b;">Last 4 completed</span>
+            </div>
+            <div id="lakeDockQueue" class="lake-dock-container"></div>
+        </div>
+
+        <!-- Fail Dock — terminated productions -->
+        <div id="failDockSection" class="section" style="border: 2px solid #7f1d1d; display: none; background: rgba(127,29,29,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span class="label" style="background: #7f1d1d; color: #f87171;">💀 Fail Dock — Terminated Productions</span>
+                <button onclick="clearFailDock()" style="background: #1e293b; border: 1px solid #334155; color: #64748b; font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Clear</button>
+            </div>
+            <div id="failDockQueue" class="fail-dock-container"></div>
+        </div>
+
+        <div id="statusSection" class="section" style="display: block; border-color: var(--primary);">
+            <div class="worker-monitor">
+                
+                <!-- WORKER 1 PLANE (v12.0.4) -->
+                <div id="worker1_ui" class="worker-lane-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span id="w1_lane_badge" class="label" style="font-size: 0.7rem; background: #6366f1;">Worker 1 (Idle)</span>
+                        <div id="w1_live_label" style="display: none; font-size: 8px; color: #f43f5e; font-weight: bold; animation: pulse 1.5s infinite;">• LIVE FEED</div>
+                    </div>
+                    
+                    <div id="w1_project_label" style="font-size: 0.7rem; color: #f8fafc; font-weight: bold; margin-bottom: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Waiting for project...</div>
+
+                    <div id="w1_preview_box" class="summary-card" style="padding: 0; overflow: hidden; height: 110px; border: 1px solid #334155; background: #000; position: relative;">
+                         <img id="w1_image" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                         <video id="w1_video" autoplay muted loop style="display: none; width: 100%; height: 100%; object-fit: cover;"></video>
+                         
+                         <!-- Persistent Idle Overlay (v12.1.1) -->
+                         <div id="w1_idle_overlay" class="worker-idle-screen" style="display: none;">
+                            <div class="idle-icon">🤖</div>
+                            <div class="idle-text">READY FOR NEXT MISSION</div>
+                         </div>
+
+                         <div id="w1_phase" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); font-size: 8px; padding: 2px 5px; border-radius: 3px; color: #34d399; font-weight: bold; border: 1px solid #34d399;">STARTUP</div>
+                         <div id="w1_status" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); font-size: 10px; padding: 4px; color: #94a3b8;">IDLE</div>
+                    </div>
+                    
+                    <div class="status-bar" style="height: 6px; margin-top: 0.5rem;">
+                        <div id="w1_progress" class="progress" style="width: 0%; height: 100%;"></div>
+                    </div>
+
+                    <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem;">
+                        <button id="w1_stop" class="btn-danger" style="padding: 0.4rem; font-size: 0.7rem; flex: 1;" onclick="workerAction('1', 'stop')">⏸ Stop Task</button>
+                        <button id="w1_resume" class="btn-primary" style="padding: 0.4rem; font-size: 0.7rem; display: none; flex: 1; background: #34d399;" onclick="workerAction('1', 'resume')">▶ Resume Lane</button>
+                        <button id="w1_terminate" class="btn-terminate" onclick="terminateWorker('1')">☠ Terminate</button>
+                    </div>
+                </div>
+
+                <!-- WORKER 2 PLANE (v12.0.4) -->
+                <div id="worker2_ui" class="worker-lane-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span id="w2_lane_badge" class="label" style="font-size: 0.7rem; background: #a855f7;">Worker 2 (Idle)</span>
+                        <div id="w2_live_label" style="display: none; font-size: 8px; color: #f43f5e; font-weight: bold; animation: pulse 1.5s infinite;">• LIVE FEED</div>
+                    </div>
+
+                    <div id="w2_project_label" style="font-size: 0.7rem; color: #f8fafc; font-weight: bold; margin-bottom: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Waiting for project...</div>
+
+                    <div id="w2_preview_box" class="summary-card" style="padding: 0; overflow: hidden; height: 110px; border: 1px solid #334155; background: #000; position: relative;">
+                         <img id="w2_image" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                         <video id="w2_video" autoplay muted loop style="display: none; width: 100%; height: 100%; object-fit: cover;"></video>
+                         
+                         <!-- Persistent Idle Overlay (v12.1.2) -->
+                         <div id="w2_idle_overlay" class="worker-idle-screen" style="display: none;">
+                            <div class="idle-icon">🦾</div>
+                            <div class="idle-text">READY FOR NEXT MISSION</div>
+                         </div>
+
+                         <div id="w2_phase" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); font-size: 8px; padding: 2px 5px; border-radius: 3px; color: #a855f7; font-weight: bold; border: 1px solid #a855f7;">STARTUP</div>
+                         <div id="w2_status" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); font-size: 10px; padding: 4px; color: #94a3b8;">IDLE</div>
+                    </div>
+                    
+                    <div class="status-bar" style="height: 6px; margin-top: 0.5rem;">
+                        <div id="w2_progress" class="progress" style="width: 0%; height: 100%;"></div>
+                    </div>
+
+                    <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem;">
+                        <button id="w2_stop" class="btn-danger" style="padding: 0.4rem; font-size: 0.7rem; flex: 1;" onclick="workerAction('2', 'stop')">⏸ Stop Task</button>
+                        <button id="w2_resume" class="btn-primary" style="padding: 0.4rem; font-size: 0.7rem; display: none; flex: 1; background: #34d399;" onclick="workerAction('2', 'resume')">▶ Resume Lane</button>
+                        <button id="w2_terminate" class="btn-terminate" onclick="terminateWorker('2')">☠ Terminate</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section" id="historySection">
+            <span class="label">Step 4: Activity Ledger</span>
+            <div class="history-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th onclick="sortTable(1)">Series/Episode</th>
+                            <th>JSON Source</th>
+                            <th>Img(count)</th>
+                            <th onclick="sortTable(4)">Timestamp</th>
+                            <th onclick="sortTable(5)">Status</th>
+                            <th>Workspace</th>
+                            <th>Ref</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size: 0.7rem; color: #64748b; margin-top: 0.75rem; text-align: center;"> 
+                💡 Click column headers to sort your cinematic history.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- SAFE INITIALIZATION (v10.3.5) ---
+        let currentStoryboardPath = "";
+        let currentRefImagePath = "";
+        let lastMessage = "";
+        let discoveredSchema = {};
+        let totalScenes = 0;
+        
+        try {
+            currentStoryboardPath = localStorage.getItem('vid_storyboard') || "";
+            currentRefImagePath = localStorage.getItem('vid_ref_image') || "";
+            totalScenes = parseInt(localStorage.getItem('vid_total_scenes')) || 0;
+            discoveredSchema = JSON.parse(localStorage.getItem('vid_schema') || "{}");
+        } catch (e) {
+            console.warn("Storage Hydration Failed, starting fresh.");
+        }
+
+        function saveState() {
+            localStorage.setItem('vid_storyboard', currentStoryboardPath);
+            localStorage.setItem('vid_ref_image', currentRefImagePath);
+            localStorage.setItem('vid_schema', JSON.stringify(discoveredSchema));
+            localStorage.setItem('vid_summary', document.getElementById('summaryDetails').innerHTML);
+            localStorage.setItem('vid_mode', document.querySelector('input[name="creation_mode"]:checked')?.value || "REGULAR");
+            localStorage.setItem('vid_watch', document.getElementById('watchMode').checked);
+            localStorage.setItem('vid_surveillance', document.getElementById('surveillanceMode').checked);
+            localStorage.setItem('vid_total_scenes', totalScenes);
+        }
+
+        function loadState() {
+            // Restore Summary
+            const savedSummary = localStorage.getItem('vid_summary');
+            if (savedSummary && savedSummary !== "Analyzing sequence details...") {
+                document.getElementById('summaryDetails').innerHTML = savedSummary;
+                document.getElementById('mappingSection').style.display = "block";
+            }
+            
+            // Restore Mode
+            const savedMode = localStorage.getItem('vid_mode');
+            if (savedMode) {
+                document.querySelector(`input[name="creation_mode"][value="${savedMode}"]`).checked = true;
+            }
+
+            // Restore Watch Mode
+            const savedWatch = localStorage.getItem('vid_watch') === 'true';
+            document.getElementById('watchMode').checked = savedWatch;
+
+            const savedSurveillance = localStorage.getItem('vid_surveillance') !== 'false';
+            document.getElementById('surveillanceMode').checked = savedSurveillance;
+
+            // Restore Ref Preview
+            if (currentRefImagePath && currentRefImagePath !== "null") {
+                const previewImg = document.getElementById('previewImg');
+                const previewDiv = document.getElementById('refPreview');
+                const refSection = document.getElementById('referenceSection');
+                
+                previewImg.src = "/uploads/" + currentRefImagePath.split(/[\\/]/).pop();
+                previewDiv.style.display = "block";
+                refSection.style.display = "block"; // [FIX] Force reveal section
+                document.getElementById('readyBadge').style.display = "block";
+                document.getElementById('uploadStatus').innerText = "✅ REFERENCE RESTORED";
+                document.getElementById('uploadStatus').style.color = "#34d399";
+            }
+        }
+
+        async function checkSession() {
+            // RESET LOCK (v10.3.3): Ignore session detection for 5s after a destructive reset
+            const resetLock = localStorage.getItem('vid_reset_lock');
+            if (resetLock && (Date.now() - parseInt(resetLock)) < 5000) {
+                console.log("Reset Lock active. Ignoring session check.");
+                loadState();
+                return;
+            }
+
+            const resp = await fetch('/status');
+            const state = await resp.json();
+            if (state.status === "RUNNING") {
+                document.getElementById('modalOverlay').style.display = "flex";
+            } else {
+                loadState(); // Local restore if idle
+            }
+        }
+
+        async function resumeSession() {
+            document.getElementById('modalOverlay').style.display = "none";
+            loadState();
+            document.getElementById('statusSection').style.display = "block";
+            pollStatus();
+        }
+
+        async function destructiveReset() {
+            if (!confirm("This will kill the current production process and clear all data. Proceed?")) return;
+            
+            // RESET LOCK (v10.3.3): Prevent loop on immediate refresh
+            localStorage.setItem('vid_reset_lock', Date.now().toString());
+
+            // Hide modal immediately for UI responsiveness
+            document.getElementById('modalOverlay').style.display = "none";
+            
+            // Clear memory first
+            localStorage.clear();
+            
+            // Re-set the lock after clear because clear() wiped it!
+            localStorage.setItem('vid_reset_lock', Date.now().toString());
+
+            // Nuclear kill on backend
+            await fetch('/stop', { method: 'POST' });
+            
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
+        async function analyzeStoryboard() {
+            const fileInput = document.getElementById('storyboardFile');
+            const summaryDiv = document.getElementById('summaryDetails');
+            const mappingDiv = document.getElementById('mappingSection');
+
+            if (fileInput.files.length === 0) return;
+
+            summaryDiv.innerHTML = "Analyzing sequence details...";
+            mappingDiv.style.display = "none";
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/analyze', { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                // [v12.0.8] Use correct keys from /analyze response
+                currentStoryboardPath = data.storyboard_path;
+                totalScenes = data.total_scenes;
+                discoveredSchema = data.compatibility_report || {};
+
+                const seriesName = data.compatibility_report?.series_title || data.storyboard_path.split(/[\\/]/).pop();
+                const episodeNum = data.compatibility_report?.episode_number || "—";
+
+                summaryDiv.innerHTML = `
+                    <div style="font-size: 0.8rem; color: #fff;">
+                        <b>📦 File:</b> ${currentStoryboardPath.split(/[\\/]/).pop()}<br>
+                        <b>🎞️ Scenes:</b> ${totalScenes}<br>
+                        <b>👥 Characters:</b> ${(data.extracted_characters || []).join(', ') || 'None detected'}<br>
+                        <span style="color: #34d399; font-size: 0.75rem;">✅ Ready to stage.</span>
+                    </div>
+                `;
+
+                mappingDiv.style.display = "block";
+                document.getElementById('referenceSection').style.display = "block"; // [v12.0.6 RESTORED]
+                saveState();
+            } catch (e) {
+                console.error("Analysis Error:", e);
+                summaryDiv.innerHTML = `<span style="color: #f43f5e;">❌ Error: ${e.message || "Failed to parse storyboard. Check server logs."}</span>`;
+                alert("Story Analysis Failed. Please ensure the backend is running and the JSON is valid.");
+            }
+        }
+
+        // Initialize on load
+        window.onload = checkSession;
+
+        async function uploadReference() {
+            const fileInput = document.getElementById('refImage');
+            const statusDiv = document.getElementById('uploadStatus');
+            const previewDiv = document.getElementById('refPreview');
+            const previewImg = document.getElementById('previewImg');
+
+            if (fileInput.files.length === 0) return;
+
+            statusDiv.innerText = "Uploading to Studio...";
+            statusDiv.style.color = "#fbbf24";
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/upload-ref', { method: 'POST', body: formData });
+                const data = await response.json();
+                currentRefImagePath = data.ref_image_path;
+
+                // [FIX] Force reveal Step 2 Section immediately on success
+                document.getElementById('referenceSection').style.display = "block";
+                document.getElementById('mappingSection').style.display = "block";
+                
+                statusDiv.innerText = "✅ REFERENCE READY FOR PHASE 1";
+                statusDiv.style.color = "#34d399";
+
+                // Show preview and Ready Badge
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = "block";
+                    document.getElementById('readyBadge').style.display = "block";
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+                saveState(); // Persist anchor DNA
+            } catch (e) {
+                statusDiv.innerText = "❌ Upload Failed";
+                statusDiv.style.color = "#f43f5e";
+            }
+        }
+
+        async function checkSyncStatus() {
+            const statusDiv = document.getElementById('syncStatus');
+            const resp = await fetch('/sync-status');
+            const data = await resp.json();
+            if (data.connected) {
+                statusDiv.innerHTML = '<b style="color: #34d399;">✅ Account Connected & Ready</b>';
+            } else {
+                statusDiv.innerHTML = '<b style="color: #f43f5e;">❌ Not Connected (Please follow Step 0)</b>';
+            }
+        }
+
+        async function connectAccount() {
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = '<b style="color: #fbbf24;">⚠️ ACTION REQUIRED: Log in in the new window, then return to the BLACK launcher window and press [ENTER] to save.</b>';
+            const resp = await fetch('/sync', { method: 'POST' });
+            
+            // Poll for status until connected
+            const poll = setInterval(async () => {
+                const checkResp = await fetch('/sync-status');
+                const checkData = await checkResp.json();
+                if (checkData.connected) {
+                    checkSyncStatus();
+                    clearInterval(poll);
+                }
+            }, 3000);
+        }
+
+        // Initialize
+        checkSyncStatus();
+        fetchLedger(); // Initial load (v11.2)
+
+        async function fetchLedger() {
+            try {
+                const response = await fetch('/ledger');
+                const data = await response.json();
+                renderLedger(data);
+            } catch (e) {
+                console.error("Ledger Fetch Error:", e);
+            }
+        }
+
+        function renderLedger(data) {
+            const body = document.getElementById('ledgerBody');
+            body.innerHTML = "";
+            
+            data.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                
+                // Color badges
+                let statusClass = "badge-progress";
+                if (row.status === "COMPLETE") statusClass = "badge-success";
+                if (row.status === "FAIL" || row.status === "ERROR") statusClass = "badge-error";
+                
+                const refImgHtml = (row.ref_image && row.ref_image !== "None") 
+                    ? `<img src="/uploads/${row.ref_image}" class="ledger-ref-thumb" title="${row.ref_image}">`
+                    : `<div class="ledger-ref-thumb" style="display:flex;align-items:center;justify-content:center;color:#334155;font-size:10px;">None</div>`;
+
+                tr.innerHTML = `
+                    <td style="font-size:0.7rem; color:#64748b; font-weight:700;">${data.length - idx}</td>
+                    <td>
+                        <div style="font-weight:700; color:var(--text);">${row.series_title}</div>
+                        <div style="font-size:0.7rem; color:#64748b;">Ep. ${row.episode}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.65rem; color:#94a3b8; font-family:monospace; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:4px;" title="${row.json_file}">${row.json_file}</div>
+                        <button class="btn-primary" style="padding:2px 6px; font-size:9px; background:#1e293b; border-color:#334155;" onclick="viewStoryboard('${row.json_file}')">👁️ Fast Preview</button>
+                    </td>
+                    <td style="text-align:center;">
+                        <span style="font-size:0.75rem; color:#34d399; font-weight:700;">${row.images || 0}</span>
+                    </td>
+                    <td style="font-size:0.75rem; color:#94a3b8;">${row.timestamp}</td>
+                    <td><span class="badge ${statusClass}">${row.status}</span></td>
+                    <td>
+                        <a href="${row.flow_project_url}" target="_blank" class="btn-tiny">🚀 Open Project</a>
+                    </td>
+                    <td>${refImgHtml}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        let sortDirections = [1, 1, 1]; // Toggle state
+        async function sortTable(col) {
+            const response = await fetch('/ledger');
+            let data = await response.json();
+            
+            sortDirections[col] *= -1;
+            const dir = sortDirections[col];
+
+            data.sort((a, b) => {
+                let valA, valB;
+                if (col === 1) { // Series
+                    valA = (a.series_title || "").toLowerCase();
+                    valB = (b.series_title || "").toLowerCase();
+                } else if (col === 4) { // Timestamp
+                    valA = new Date(a.timestamp);
+                    valB = new Date(b.timestamp);
+                } else if (col === 5) { // Status
+                    valA = a.status || "";
+                    valB = b.status || "";
+                }
+                
+                if (valA < valB) return -1 * dir;
+                if (valA > valB) return 1 * dir;
+                return 0;
+            });
+
+            renderLedger(data);
+        }
+
+        // --- JSON PREVIEW LOGIC (v12.2.1) ---
+        async function viewStoryboard(filename) {
+            if (!filename || filename === "None") return;
+            const overlay = document.getElementById('jsonPreviewOverlay');
+            const content = document.getElementById('jsonContent');
+            const title = document.getElementById('previewTitle');
+            
+            title.innerText = `📄 Preview: ${filename}`;
+            content.innerText = "Loading storyboard content...";
+            overlay.style.display = "block";
+            
+            try {
+                const resp = await fetch(`/storyboard/${filename}`);
+                const data = await resp.json();
+                content.innerText = JSON.stringify(data, null, 4);
+            } catch (e) {
+                content.innerText = "Error loading JSON data.";
+                console.error(e);
+            }
+        }
+
+        function closeJSONPreview() {
+            document.getElementById('jsonPreviewOverlay').style.display = "none";
+        }
+
+        function copyJSON() {
+            const content = document.getElementById('jsonContent').innerText;
+            navigator.clipboard.writeText(content);
+            alert("JSON copied to clipboard!");
+        }
+
+        // --- MARATHON SCRIPTING (v12.0) ---
+        async function clearQueue() {
+            if (!confirm("Clear all staged jobs?")) return;
+            await fetch('/queue/clear', { method: 'POST' });
+            refreshQueue();
+            document.getElementById('marathonSection').style.display = "none";
+        }
+
+        async function addToQueue() {
+            const config = {
+                storyboard_path: currentStoryboardPath,
+                choices: {},
+                watch_mode: document.getElementById('watchMode').checked,
+                ref_image_path: currentRefImagePath,
+                creation_mode: "REGULAR",
+                surveillance_enabled: document.getElementById('surveillanceMode').checked
+            };
+
+            const resp = await fetch('/queue/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            });
+            const data = await resp.json();
+            
+            if (data.status === "STAGED") {
+                document.getElementById('marathonSection').style.display = "block";
+                document.getElementById('mappingSection').style.display = "none";
+                document.getElementById('referenceSection').style.display = "none";
+                document.getElementById('readyBadge').style.display = "none";
+                refreshQueue();
+            }
+        }
+
+        async function refreshQueue() {
+            const resp = await fetch('/queue');
+            const queue = await resp.json();
+
+            // Split into stages
+            const activeJobs = queue.filter(j => j.status === 'PENDING' || j.status === 'PROCESSING');
+            const completedJobs = queue.filter(j => j.status === 'COMPLETE');
+            const failedJobs = queue.filter(j => j.status === 'FAILED');
+
+            // --- STAGING DOCK (active only) ---
+            const container = document.getElementById('stagingQueue');
+            container.innerHTML = "";
+            if (activeJobs.length > 0) {
+                document.getElementById('marathonSection').style.display = "block";
+            } else {
+                document.getElementById('marathonSection').style.display = "none";
+            }
+
+            activeJobs.forEach(job => {
+                const sbName = job.config.storyboard_path.split(/[\\\/]/).pop();
+                const refImg = job.config.ref_image_path
+                    ? "/uploads/" + job.config.ref_image_path.split(/[\\\/]/).pop()
+                    : "https://placehold.co/140x70/1e293b/475569?text=No+Ref";
+                const card = document.createElement('div');
+                card.className = `job-card ${job.status === 'PROCESSING' ? 'processing' : ''}`;
+                card.style.position = "relative";
+                card.innerHTML = `
+                    <div class="btn-remove-job" onclick="removeFromQueue('${job.id}')" title="Remove from queue">✕</div>
+                    <div class="job-title">${sbName}</div>
+                    <img src="${refImg}" onerror="this.src='https://placehold.co/140x70/1e293b/475569?text=No+Ref'">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem;">
+                        <span class="status-badge ${job.status === 'PROCESSING' ? 'status-processing' : 'status-pending'}">
+                            ${job.worker ? `<span class="worker-badge">W${job.worker}</span> ` : ''}${job.status}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // --- LAKE DOCK (last 4 completed) ---
+            refreshLakeDock(completedJobs);
+
+            // --- FAIL DOCK (terminated) ---
+            refreshFailDock(failedJobs);
+        }
+
+        function refreshLakeDock(completedJobs) {
+            const lakeSection = document.getElementById('lakeDockSection');
+            const lakeContainer = document.getElementById('lakeDockQueue');
+            lakeContainer.innerHTML = "";
+
+            // Take last 4 only
+            const recent = completedJobs.slice(-4).reverse();
+
+            if (recent.length === 0) {
+                lakeSection.style.display = "none";
+                return;
+            }
+
+            lakeSection.style.display = "block";
+            recent.forEach(job => {
+                const sbName = job.config.storyboard_path.split(/[\\\/]/).pop();
+                const refImg = job.config.ref_image_path
+                    ? "/uploads/" + job.config.ref_image_path.split(/[\\\/]/).pop()
+                    : "https://placehold.co/140x60/0f172a/166534?text=Done";
+                const ts = job.completed_at || job.added_at || "";
+                const card = document.createElement('div');
+                card.className = "lake-card";
+                card.innerHTML = `
+                    <div class="job-title">${sbName}</div>
+                    <img src="${refImg}" onerror="this.src='https://placehold.co/140x60/0f172a/166534?text=Done'">
+                    <div class="lake-timestamp">✅ ${ts}</div>
+                    ${job.worker ? `<div style="font-size:0.55rem; color:#34d399; margin-top:2px;">Worker ${job.worker}</div>` : ''}
+                `;
+                lakeContainer.appendChild(card);
+            });
+        }
+
+        function refreshFailDock(failedJobs) {
+            const failSection = document.getElementById('failDockSection');
+            const failContainer = document.getElementById('failDockQueue');
+            failContainer.innerHTML = "";
+
+            if (failedJobs.length === 0) {
+                failSection.style.display = "none";
+                return;
+            }
+
+            failSection.style.display = "block";
+            failedJobs.slice(-4).reverse().forEach(job => {
+                const sbName = job.config.storyboard_path.split(/[\\\/]/).pop();
+                const refImg = job.config.ref_image_path
+                    ? "/uploads/" + job.config.ref_image_path.split(/[\\\/]/).pop()
+                    : "https://placehold.co/140x60/1e293b/7f1d1d?text=Failed";
+                const ts = job.failed_at || "";
+                const card = document.createElement('div');
+                card.className = "fail-card";
+                card.innerHTML = `
+                    <div class="job-title">${sbName}</div>
+                    <img src="${refImg}" onerror="this.src='https://placehold.co/140x60/1e293b/7f1d1d?text=Failed'">
+                    <div class="fail-timestamp">❌ ${ts}</div>
+                `;
+                failContainer.appendChild(card);
+            });
+        }
+
+        async function clearFailDock() {
+            await fetch('/queue/clear-failed', { method: 'POST' });
+            refreshQueue();
+        }
+
+        async function removeFromQueue(jobId) {
+            if (!confirm("Remove this job from the queue?")) return;
+            await fetch(`/queue/remove?job_id=${jobId}`, { method: 'POST' });
+            refreshQueue();
+        }
+
+        async function terminateWorker(wid) {
+            if (!confirm(`☠ TERMINATE Worker ${wid}?\n\nThis will permanently cancel the current production and move it to the Fail Dock. The worker will be freed for the next queued job.`)) return;
+            await fetch(`/worker/action?worker_id=${wid}&action=terminate`, { method: 'POST' });
+            refreshQueue();
+            fetchLedger();
+            // Brief delay then poll to update worker UI to standby
+            setTimeout(pollStatus, 800);
+        }
+
+        async function workerAction(wid, action) {
+            await fetch(`/worker/action?worker_id=${wid}&action=${action}`, { method: 'POST' });
+            pollStatus();
+            refreshQueue();
+        }
+
+        async function pollStatus() {
+            const resp = await fetch('/status');
+            const data = await resp.json();
+
+            if (Object.values(data.workers).some(s => s.status !== "IDLE" || s.locked)) {
+                 document.getElementById('statusSection').style.display = "block";
+            }
+
+            // Loop through workers
+            for (const [wid, state] of Object.entries(data.workers)) {
+                const ui_prefix = `w${wid}`;
+                const progressBar = document.getElementById(`${ui_prefix}_progress`);
+                const statusBox = document.getElementById(`${ui_prefix}_status`);
+                const imagePreview = document.getElementById(`${ui_prefix}_image`);
+                const videoPreview = document.getElementById(`${ui_prefix}_video`);
+                const liveLabel = document.getElementById(`${ui_prefix}_live_label`);
+                const phaseBox = document.getElementById(`${ui_prefix}_phase`);
+                const projectBox = document.getElementById(`${ui_prefix}_project_label`);
+                const stopBtn = document.getElementById(`${ui_prefix}_stop`);
+                const resumeBtn = document.getElementById(`${ui_prefix}_resume`);
+                const laneBadge = document.getElementById(`${ui_prefix}_lane_badge`);
+                const previewBox = document.getElementById(`${ui_prefix}_preview_box`);
+                const idleOverlay = document.getElementById(`${ui_prefix}_idle_overlay`);
+
+                statusBox.innerText = state.message || "Ready";
+                phaseBox.innerText = state.phase || "IDLE";
+                projectBox.innerText = state.series_title ? `PRODUCING: ${state.series_title}` : "Waiting for project...";
+                
+                // Lock / Pause Logic (Stop → shows Resume + Terminate)
+                const terminateBtn = document.getElementById(`${ui_prefix}_terminate`);
+                if (state.locked) {
+                    stopBtn.style.display = "none";
+                    resumeBtn.style.display = "block";
+                    terminateBtn.style.display = "block";
+                    laneBadge.innerHTML = `⏸ Worker ${wid} &mdash; Paused`;
+                    laneBadge.style.background = "#334155";
+                    laneBadge.style.color = "#94a3b8";
+                    previewBox.classList.add('lane-locked');
+                    previewBox.classList.remove('lane-standby');
+                    if (idleOverlay) idleOverlay.style.display = "none";
+                } else if (state.status === "IDLE") {
+                    // --- STANDBY MODE ---
+                    resumeBtn.style.display = "none";
+                    stopBtn.style.display = "none";
+
+                    // Pulsing green lane badge
+                    laneBadge.innerHTML = '<span class="standby-badge">STANDBY</span>';
+                    laneBadge.style.background = "transparent";
+
+                    // Glowing preview box with persistent overlay toggle
+                    previewBox.classList.remove('lane-locked');
+                    previewBox.classList.add('lane-standby');
+                    if (idleOverlay) idleOverlay.style.display = "flex";
+                    
+                    imagePreview.style.display = "none";
+                    videoPreview.style.display = "none";
+                    liveLabel.style.display = "none";
+
+                    // Reset project label
+                    projectBox.innerText = "No active task.";
+                    projectBox.style.color = "#34d399";
+
+                    // Reset progress bar to 0
+                    progressBar.style.width = "0%";
+                    progressBar.classList.remove('victory');
+                    terminateBtn.style.display = "none";
+
+                    // Explicitly reset status and phase text for IDLE
+                    statusBox.innerText = "Awaiting orders...";
+                    phaseBox.innerText = "STANDBY";
+                    statusBox.style.color = "#34d399";
+
+                } else {
+                    // --- ACTIVE / RUNNING ---
+                    resumeBtn.style.display = "none";
+                    terminateBtn.style.display = "none";
+                    stopBtn.style.display = "block";
+                    laneBadge.innerHTML = `⚡ Worker ${wid} &mdash; Active`;
+                    laneBadge.style.background = wid === "1" ? "#6366f1" : "#a855f7";
+                    laneBadge.style.color = "#fff";
+                    previewBox.classList.remove('lane-locked', 'lane-standby');
+                    if (idleOverlay) idleOverlay.style.display = "none";
+                    projectBox.style.color = "#f8fafc";
+                    statusBox.style.color = "#94a3b8";
+
+                    // --- ACTIVE-ONLY UPDATES (v12.1.3) ---
+                    // Progress Math
+                    const total = state.total_scenes || 1;
+                    const current = state.current_scene || 0;
+                    const percent = Math.round((current / total) * 100);
+                    progressBar.style.width = percent + "%";
+
+                    // Visual Feed (only show if we have a fresh thumbnail)
+                    if (state.last_thumbnail) {
+                        liveLabel.style.display = "block";
+                        if (state.last_thumbnail.endsWith('.mp4')) {
+                            videoPreview.src = state.last_thumbnail;
+                            videoPreview.style.display = "block";
+                            imagePreview.style.display = "none";
+                        } else {
+                            imagePreview.src = state.last_thumbnail;
+                            imagePreview.style.display = "block";
+                            videoPreview.style.display = "none";
+                        }
+                    } else {
+                        liveLabel.style.display = "none";
+                        imagePreview.style.display = "none";
+                        imagePreview.src = "";
+                        videoPreview.style.display = "none";
+                        videoPreview.src = "";
+                    }
+                }
+            }
+
+            // Sync queue list while running
+            refreshQueue();
+
+            if (Object.values(data.workers).some(s => s.status !== "IDLE" || s.locked) || data.queue_count > 0) {
+                setTimeout(pollStatus, 3000);
+            }
+        }
+        let lastQueueCount = 0;
+
+        // Custom start override for single runs if ever needed
+        async function startProduction() {
+             addToQueue(); // Redirect old start button to new shared logic
+        }
+
+        // Initialize queue on load
+        const oldOnload = window.onload;
+        window.onload = function() {
+            if (oldOnload) oldOnload();
+            refreshQueue();
+            pollStatus(); // Start polling to see if anything is already running
+        }
+    </script>
+</body>
+</html>

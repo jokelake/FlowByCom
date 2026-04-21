@@ -1,0 +1,49 @@
+{
+    "series_title": "น้องช้างจอมพลังแห่งความดี",
+    "episode_number": 2,
+    "episode_title": "ช้างน้อยและภารกิจเก็บตุ๊กตา",
+    "global_settings": {
+        "aspect_ratio": "9:16",
+        "character_consistency": "Baby anthropomorphic elephant, soft grey skin, wearing blue pajamas with bear and star prints",
+        "video_style": "3D Animation, Pixar style, cinematic soft lighting",
+        "audio_language": "Thai"
+    },
+    "storyboard": [
+        {
+            "scene_number": 1,
+            "duration_seconds": 4,
+            "image_prompt": "An adorable baby anthropomorphic elephant (Little Chang), standing on two legs, wearing cute blue cartoon patterned pajamas with bears and stars. Sitting on a messy wooden floor surrounded by scattered stuffed animals. Cinematic lighting, soft glow. Vertical 9:16.",
+            "video_motion_prompt": "Little Chang sits on the floor looking around at the mess, his trunk twitches curiously, subtle head tilt, eyes blinking naturally. Soft camera zoom-in.",
+            "audio_script": "ทำไมตุ๊กตาเต็มไปหมดเลยนะ?",
+            "voice_timing": {
+                "start": 0.5,
+                "end": 3.0
+            },
+            "transition": "Cut"
+        },
+        {
+            "scene_number": 2,
+            "duration_seconds": 4,
+            "image_prompt": "Little Chang, baby elephant in blue pajamas, looking up with a confused expression. A tall shadow of his mother approaches from the side. An empty colorful toy basket is visible in the corner. Vertical 9:16.",
+            "video_motion_prompt": "A shadow moves across the floor towards Chang. Chang reacts by looking up and perking his large ears. His trunk curls slightly in surprise.",
+            "audio_script": "ช้างน้อยคะ วันนี้เราต้องช่วยกันเก็บของเล่นให้หมดนะ",
+            "voice_timing": {
+                "start": 0.5,
+                "end": 3.5
+            },
+            "transition": "Smooth Pan"
+        },
+        {
+            "scene_number": 3,
+            "duration_seconds": 4,
+            "image_prompt": "Close-up portrait of Little Chang's face, baby elephant identity, wearing blue patterned pajamas. Huge innocent eyes, bright smile, determined expression. Soft skin texture. Vertical 9:16.",
+            "video_motion_prompt": "Little Chang smiles widely, nods his head confidently, and lifts his trunk high in a heroic gesture. Sparkling eye glints.",
+            "audio_script": "โอเคครับแม่ ผมจะเป็นฮีโร่เก็บตุ๊กตา!",
+            "voice_timing": {
+                "start": 0.5,
+                "end": 3.5
+            },
+            "transition": "Fade to Black"
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "series": {
+        "น้องมะลิจอมพลังแห่งความดี": {
+            "characters": {
+                "Mali": {
+                    "physical_description": "Mali, 3 years old, two pigtail buns, pink flower clip, innocent large eyes.",
+                    "fixed_seed": 1001,
+                    "reference_images": []
+                },
+                "Mom": {
+                    "physical_description": "Mali's mother, kind expression, casual home wear.",
+                    "fixed_seed": 2002,
+                    "reference_images": []
+                }
+            }
+        }
+    },
+    "global_registry": {
+        "Mali": ["น้องมะลิจอมพลังแห่งความดี"],
+        "Mom": ["น้องมะลิจอมพลังแห่งความดี"]
+    }
+}

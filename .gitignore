@@ -1,0 +1,42 @@
+# --- System ---
+.DS_Store
+Thumbs.db
+
+# --- Python ---
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.history/
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- Project Specific Storage ---
+# We ignore these because they contain local session data or large generated assets
+sessions/
+uploads/
+output/
+temp_run_config.json
+marathon_queue.json
+engine_state*.json
+*.log
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo

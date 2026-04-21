@@ -1,0 +1,14 @@
+2026/04/21-19:08:33.158 31ac Reusing MANIFEST C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile\Profile 1\IndexedDB\https_labs.google_0.indexeddb.leveldb/MANIFEST-000001
+2026/04/21-19:08:33.158 31ac Recovering log #491
+2026/04/21-19:08:33.159 31ac Reusing old log C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile\Profile 1\IndexedDB\https_labs.google_0.indexeddb.leveldb/000491.log 
+2026/04/21-19:08:33.159 31ac Delete type=2 #489
+2026/04/21-19:08:33.171 4500 Level-0 table #496: started
+2026/04/21-19:08:33.175 4500 Level-0 table #496: 1177 bytes OK
+2026/04/21-19:08:33.176 4500 Delete type=0 #491
+2026/04/21-19:08:33.177 187c Manual compaction at level-0 from '\x00\x82\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x83\x00\x00\x00' @ 0 : 0; will stop at '\x00\x82\x00\x00\x05' @ 4489 : 1
+2026/04/21-19:08:33.177 187c Compacting 1@0 + 1@1 files
+2026/04/21-19:08:33.179 187c Generated table #497@0: 192 keys, 3960 bytes
+2026/04/21-19:08:33.179 187c Compacted 1@0 + 1@1 files => 3960 bytes
+2026/04/21-19:08:33.181 187c compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/04/21-19:08:33.181 187c Delete type=2 #496
+2026/04/21-19:08:33.181 187c Manual compaction at level-0 from '\x00\x82\x00\x00\x05' @ 4489 : 1 .. '\x00\x83\x00\x00\x00' @ 0 : 0; will stop at (end)

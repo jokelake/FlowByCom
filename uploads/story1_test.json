@@ -1,0 +1,70 @@
+{
+    "episode_metadata": {
+        "episode_number": 8,
+        "episode_title": "มะลิช่วยนกตัวน้อย",
+        "main_outfit": "Bright yellow t-shirt under yellow denim overalls, white sneakers with pink laces",
+        "voice_style": "Consistent 3-year-old Thai girl voice, sweet and high-pitched"
+    },
+    "storyboard": [
+        {
+            "scene_number": 1,
+            "image_prompt": "3D Pixar style, 3-year-old Mali, 2 pigtail buns, pink flower clip, wearing a bright yellow outfit. She is standing in a lush green backyard with a large mango tree. Sunlight filtering through leaves. 9:16 aspect ratio, ultra-detailed.",
+            "video_prompt": "Visual: Mali in yellow outfit in a sunny backyard. Camera: Medium shot, slow Pan Left. Audio: Mali's consistent high-pitched sweet Thai girl voice. 0-3s: Mali skips joyfully through the grass. 3-6s: She stops and tilts her ear toward a sound. 6-8s: She looks up at the tree with a curious smile. (Mali: 'เอ๊ะ... เสียงนกที่ไหนร้องคะ?')",
+            "thai_dialogue": "มะลิ: เอ๊ะ... เสียงนกที่ไหนร้องคะ?"
+        },
+        {
+            "scene_number": 2,
+            "image_prompt": "Close-up of a small blue baby bird shivering on a low tree branch. Detailed feathers, 3D Pixar rendering. The background is blurred green foliage.",
+            "video_prompt": "Visual: Small blue baby bird on a branch. Camera: Macro close-up, static. 0-4s: The bird chirps weakly and shivers. 4-8s: Camera pulls back to reveal Mali’s face entering the frame, looking worried. Audio: Mali's high-pitched sweet voice, soft and gentle tone. (Mali: 'โอ๋ๆ... เจ้านกน้อย ตกลงมาหรอจ๊ะ?')",
+            "thai_dialogue": "มะลิ: โอ๋ๆ... เจ้านกน้อย ตกลงมาหรอจ๊ะ?"
+        },
+        {
+            "scene_number": 3,
+            "image_prompt": "Mali reaching out her small hand toward the bird. Only one baby bird on the branch. Mali’s yellow sleeve is visible. Soft morning light, 9:16.",
+            "video_prompt": "Visual: Mali’s small hand approaching the bird. Camera: Point-of-view from Mali's perspective. 0-3s: Mali’s hand moves slowly and steadily. 3-6s: She gently strokes the bird's head with one finger. 6-8s: The bird stops shivering. Audio: Mali's sweet childlike voice, whispering. (Mali: 'ไม่ต้องกลัวนะ... มะลิอยู่นี่แล้ว')",
+            "thai_dialogue": "มะลิ: ไม่ต้องกลัวนะ... มะลิอยู่นี่แล้ว"
+        },
+        {
+            "scene_number": 4,
+            "image_prompt": "Mali looking around for the bird's mother. A wooden birdhouse is visible high up in the tree. 3D garden environment, ultra-realistic textures.",
+            "video_prompt": "Visual: Mali looking up and around the backyard. Camera: Low angle, rotating around Mali. 0-4s: Mali puts a hand over her eyes to block the sun, looking up. 4-8s: She points at the birdhouse high above. Audio: Mali's energetic and bright Thai girl voice. (Mali: 'บ้านเจ้านกอยู่นั่นเอง... สูงจังเลยค่ะ')",
+            "thai_dialogue": "มะลิ: บ้านเจ้านกอยู่นั่นเอง... สูงจังเลยค่ะ"
+        },
+        {
+            "scene_number": 5,
+            "image_prompt": "Mali calling out for her Dad. Her mouth is wide open, hand cupped around her mouth. Vibrant yellow outfit, 3D Pixar style.",
+            "video_prompt": "Visual: Mali calling for help. Camera: Medium close-up, front view. 0-3s: Mali cups her hands around her mouth. 3-6s: She calls out loudly with a big smile. 6-8s: She hops up and down. Audio: Mali's loud, high-pitched, energetic Thai girl voice. (Mali: 'คุณพ่อขา! มาช่วยนกน้อยหน่อยค่ะ!')",
+            "thai_dialogue": "มะลิ: คุณพ่อขา! มาช่วยนกน้อยหน่อยค่ะ!"
+        },
+        {
+            "scene_number": 6,
+            "image_prompt": "Mali's Dad (tall, kind Thai man) entering the frame, carrying a small wooden ladder. Mali is jumping with joy next to him. 9:16 vertical.",
+            "video_prompt": "Visual: Dad and Mali by the tree. Camera: Wide shot, static. 0-3s: Dad walks in and sets the ladder. 4-8s: Mali claps her hands rapidly in excitement. Audio: Mali's giggling and happy high-pitched voice. (Mali: 'เย้! คุณพ่อมาแล้ว ช่วยเจ้านกด้วยนะคะ')",
+            "thai_dialogue": "มะลิ: เย้! คุณพ่อมาแล้ว ช่วยเจ้านกด้วยนะคะ"
+        },
+        {
+            "scene_number": 7,
+            "image_prompt": "Close-up of Mali watching her Dad's hand (carrying the bird) reaching for the birdhouse. Mali's eyes are wide with anticipation.",
+            "video_prompt": "Visual: Mali's reaction. Camera: Close-up on Mali’s face. 0-4s: Mali watches intently, her eyes moving upward following the bird. 4-8s: She holds her breath, then gasps with joy. Audio: Mali's soft, breathy, excited voice. (Mali: 'ใกล้ถึงแล้ว... ฮึบๆ นะคะคุณพ่อ')",
+            "thai_dialogue": "มะลิ: ใกล้ถึงแล้ว... ฮึบๆ นะคะคุณพ่อ"
+        },
+        {
+            "scene_number": 8,
+            "image_prompt": "The baby bird safely inside the birdhouse with its mother bird. Mali is visible below, waving. Cinematic lighting, warm and happy.",
+            "video_prompt": "Visual: Birdhouse with birds inside. Camera: Tilt down from the birdhouse to Mali on the ground. 0-4s: Mali waves both hands at the birdhouse. 4-8s: She blows a kiss upward. Audio: Mali's high-pitched, sweet, and satisfied Thai girl voice. (Mali: 'ถึงบ้านแล้วนะจ๊ะ... บ๊ายบายเจ้านกน้อย')",
+            "thai_dialogue": "มะลิ: ถึงบ้านแล้วนะจ๊ะ... บ๊ายบายเจ้านกน้อย"
+        },
+        {
+            "scene_number": 9,
+            "image_prompt": "Dad hugging Mali in the garden. Mali is beaming with pride. The yellow outfit looks vibrant against the green grass. 3D Pixar style.",
+            "video_prompt": "Visual: Dad hugging Mali. Camera: Medium shot, warm lighting. 0-3s: Dad picks Mali up and hugs her. 4-8s: Mali puts her arms around Dad's neck and nuzzles his cheek. Audio: Mali's sweet, loving, and clear Thai girl voice. (Mali: 'มะลิมีความสุขจังเลยค่ะคุณพ่อ')",
+            "thai_dialogue": "มะลิ: มะลิมีความสุขจังเลยค่ะคุณพ่อ"
+        },
+        {
+            "scene_number": 10,
+            "image_prompt": "Mali waving to the camera, standing under the mango tree. The sun is setting, creating a golden glow. 9:16 finale shot.",
+            "video_prompt": "Visual: Mali's final wave. Camera: Slow Dolly Out. 0-4s: Mali waves at the camera with a huge smile. 4-8s: She spins around once, her pigtails flying. Audio: Mali's bright, energetic, high-pitched Thai girl voice. (Mali: 'ช่วยนกน้อยแล้วใจดีจัง... พรุ่งนี้มาดูมะลิใหม่นะ บ๊ายบายค่ะ!')",
+            "thai_dialogue": "มะลิ: ช่วยนกน้อยแล้วใจดีจัง... พรุ่งนี้มาดูมะลิใหม่นะ บ๊ายบายค่ะ!"
+        }
+    ]
+}
