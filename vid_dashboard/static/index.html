@@ -1037,7 +1037,7 @@
                 // Color badges
                 let statusClass = "badge-progress";
                 if (row.status === "COMPLETE") statusClass = "badge-success";
-                if (row.status === "FAIL" || row.status === "ERROR") statusClass = "badge-error";
+                if (row.status === "FAIL" || (row.status && row.status.includes("ERROR"))) statusClass = "badge-error";
                 
                 const refImgHtml = (row.ref_image && row.ref_image !== "None") 
                     ? `<img src="/uploads/${row.ref_image}" class="ledger-ref-thumb" title="${row.ref_image}">`

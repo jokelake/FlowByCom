@@ -89,7 +89,7 @@ class GhostEngine:
             json.dump(state, f)
         
         # Update Ledger if finishing
-        if status in ["COMPLETE", "STOPPED", "ERROR"]:
+        if status in ["COMPLETE", "STOPPED"] or "ERROR" in status:
             self._update_ledger(status)
             
         print(f"[GhostEngine] {status}: {message}")
