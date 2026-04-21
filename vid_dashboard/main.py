@@ -199,7 +199,7 @@ def start_production(config: ProductionConfig, worker_id: str = "1"):
         print(f"[Backend] Mirroring Error: {e} (Continuing with existing profile)")
 
     cmd = [
-        "python", "vid_engine/ghost_engine.py", 
+        sys.executable, "vid_engine/ghost_engine.py", 
         config.storyboard_path, 
         config_path,
         "--worker_id", worker_id,
@@ -492,7 +492,7 @@ def get_ledger():
 def sync_account():
     """Launches the visible session_sync.py so the user can log in manually."""
     # We use a visible browser here so the user can handle the login
-    cmd = ["python", "vid_engine/session_sync.py"]
+    cmd = [sys.executable, "vid_engine/session_sync.py"]
     subprocess.Popen(cmd)
     return {"status": "SYNC_STARTED", "message": "Login window opened. Please log in and close it when done."}
 
