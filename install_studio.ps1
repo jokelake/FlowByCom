@@ -74,9 +74,19 @@ Write-Host "[OK] Dependencies installed." -ForegroundColor Green
 Write-Host "[*] Preparing rendering engine (Chromium)..."
 $PlaywrightPath = "$VenvFolder\Scripts\playwright.exe"
 if (Test-Path $PlaywrightPath) {
-    & $PlaywrightPath install chromium
+    Write-Host "[*] Installing Chromium and system dependencies..."
+    & "$VenvFolder\Scripts\python.exe" -m playwright install --with-deps chromium
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[ERROR] Playwright browser installation failed." -ForegroundColor Red
+        Read-Host "Press Enter to exit"
+        exit
+    }
+    
+    # Verification Check
+    Write-Host "[*] Verifying Playwright integration..."
+    & "$VenvFolder\Scripts\python.exe" -c "import playwright; print('Playwright Library: OK')"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[ERROR] Playwright library is installed but not working. This usually means a dependency is missing." -ForegroundColor Red
         Read-Host "Press Enter to exit"
         exit
     }
