@@ -927,6 +927,7 @@
                 summaryDiv.innerHTML = `
                     <div style="font-size: 0.8rem; color: #fff;">
                         <b>📦 File:</b> ${currentStoryboardPath.split(/[\\/]/).pop()}<br>
+                        <b>📜 Format:</b> ${data.compatibility_report?.json_format || 'Unknown'}<br>
                         <b>🎞️ Scenes:</b> ${totalScenes}<br>
                         <b>👥 Characters:</b> ${(data.extracted_characters || []).join(', ') || 'None detected'}<br>
                         <span style="color: #34d399; font-size: 0.75rem;">✅ Ready to stage.</span>

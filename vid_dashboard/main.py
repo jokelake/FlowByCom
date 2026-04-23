@@ -138,6 +138,8 @@ async def analyze_storyboard(file: UploadFile = File(...)):
     with open(file_path, "r", encoding="utf-8") as f:
         sb_data = json.load(f)
         total_scenes = len(sb_data.get("storyboard", []))
+        if total_scenes == 0:
+            total_scenes = len(sb_data.get("scenes", []))
 
     return {
         "storyboard_path": file_path,

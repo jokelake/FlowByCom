@@ -112,9 +112,11 @@ class GhostEngine:
                 sb_data = json.load(f)
                 series = sb_data.get("series_title", "Unknown Series")
                 episode = sb_data.get("episode_number", "0")
-                scenes = sb_data.get("storyboard", [])
+                is_new_fmt = "scenes" in sb_data
+                scenes = sb_data.get("scenes", []) if is_new_fmt else sb_data.get("storyboard", [])
+                image_count = len(scenes) * 2 if is_new_fmt else len(scenes)
         except:
-            series, episode, scenes = "Error Loading", "0", []
+            series, episode, scenes, image_count = "Error Loading", "0", [], 0
 
         row = {
             "run_id": self.run_id,
@@ -122,7 +124,7 @@ class GhostEngine:
             "json_file": os.path.basename(self.storyboard_path),
             "series_title": series,
             "episode": episode,
-            "images": len(scenes),
+            "images": image_count,
             "videos": len(scenes),
             "ref_image": os.path.basename(getattr(self, 'ref_image_path', "")) or "None",
             "flow_project_url": getattr(self, 'flow_project_url', "Initializing..."),
@@ -369,7 +371,7 @@ class GhostEngine:
             return False
 
     async def perform_reference_upload(self, page, image_path, scene_num=1):
-        """Unified Evolutionary Handshake (v9.23): Links Portrait (Scene 1) or Result (Scene 2+)."""
+        """Unified Handshake: Uploads Portrait (Scene 1) and links it for all scenes."""
         try:
             # 1. SCENE 1 SPECIAL CASE: Upload from Phase 0
             if scene_num == 1:
@@ -379,7 +381,7 @@ class GhostEngine:
 
                 self.update_state("Injecting Starting Reference Image...", "ANCHORING")
                 # Hyper-resilient selector for the '+' button (v9.25)
-                ref_btn_sel = 'div:has(> div[role="textbox"]) button:has(i:text-is("add_2")), button:has(i:text-is("add_2")), button[aria-label*="Add"]'
+                ref_btn_sel = 'button[aria-haspopup="dialog"]:has(i:text-is("add_2")), button:has(i:text-is("add_2"))'
                 await self.click_stealth(page, ref_btn_sel)
                 await asyncio.sleep(1.0)
                 
@@ -398,35 +400,46 @@ class GhostEngine:
                 self.update_state("Scene 1 Auto-Link Secured.", "ANCHORING")
                 return True
 
-            # 2. EVOLUTIONARY LINKING: Use 'Most Left' (Scene 2+)
+            # 2. CONTINUOUS LINKING: Combine 'Ref Image' (Identity Anchor) + 'Most Left' (Recent Render)
+            self.update_state(f"Linking Scene {scene_num} Anchors...", "ANCHORING")
+            
+            # --- A. ADD REF IMAGE (FROM PICKER) (Only if provided) ---
+            if image_path:
+                # Click '+' to open picker
+                ref_btn_sel = 'button[aria-haspopup="dialog"]:has(i:text-is("add_2")), button:has(i:text-is("add_2"))'
+                await self.click_stealth(page, ref_btn_sel)
+                await asyncio.sleep(1.5)
+                
+                # Select FIRST index from picker gallery (User confirmed Ref Image is at index 0)
+                picker_box = page.locator('div[data-radix-popper-content-wrapper]')
+                picker_item = picker_box.locator('[data-testid="virtuoso-item-list"] > div').nth(0).locator('img').first
+                
+                await picker_item.wait_for(state="visible", timeout=20000)
+                await self.click_stealth(page, picker_item)
+                await asyncio.sleep(1.0)
+                
+                # Close the picker
+                await page.keyboard.press("Escape")
+                await asyncio.sleep(1.0)
+
+            # --- B. ADD MOST LEFT (RECENT RENDER) ---
+            # Clear any potential focus/menus before targeting the gallery
             await page.keyboard.press("Escape")
             await asyncio.sleep(1.0)
-
-            # --- THE HANDSHAKE PROTOCOL RESTORED (v9.30) ---
-            # Re-open Asset Picker to perform the definitive link
-            # Scoped to the prompt area to avoid sidebar conflicts
-            # ref_btn_sel = 'div:has(> div[role="textbox"]) button:has(i:text-is("add_2")), button:has(i:text-is("add_2"))'
-            # await self.click_stealth(page, ref_btn_sel)
-            # await asyncio.sleep(1.5)
-
-            self.update_state(f"Linking Scene {scene_num} Anchor (Most Left)...", "ANCHORING")
             
-            # BULLSEYE TARGETING: Target the IMAGE directly
-            asset_item = page.locator('[data-testid="virtuoso-item-list"] > div:first-child img').first
-            await asset_item.wait_for(state="visible", timeout=20000)
-            await asset_item.hover()
-            await asset_item.click(button="right")
+            most_left_item = page.locator('[data-testid="virtuoso-item-list"] > div:first-child img').first
+            await most_left_item.wait_for(state="visible", timeout=20000)
+            await most_left_item.hover()
+            await most_left_item.click(button="right")
             await asyncio.sleep(1.0)
             
-            # Select "+ Add to prompt"
             add_option_sel = 'div[role="menuitem"]:has-text("Add to prompt"), [role="menuitem"] >> text=/Add to prompt/i'
             await self.click_stealth(page, add_option_sel)
             
-            # THE COMMIT: Lock the link and clear the picker
             await page.keyboard.press("Escape")
             await asyncio.sleep(1.0)
             
-            self.update_state(f"Scene {scene_num} Anchor Secured.", "ANCHORING")
+            self.update_state(f"Scene {scene_num} Anchors Secured.", "ANCHORING")
             return True
         except Exception as e:
             self.update_state(f"Warning: Handshake failed: {e}")
@@ -513,7 +526,8 @@ class GhostEngine:
         # Initial Clock-In
         self._update_ledger("IN_PROGRESS 0")
         storyboard_data = self.load_storyboard()
-        scenes = storyboard_data.get("storyboard", [])
+        self.is_new_format = "scenes" in storyboard_data
+        scenes = storyboard_data.get("scenes", []) if self.is_new_format else storyboard_data.get("storyboard", [])
         self.total_scenes = len(scenes)
         self.phase = "Initialization"
         self.update_state("Launching Workspace (Syncing Canvas)...", progress=0)
@@ -610,34 +624,33 @@ class GhostEngine:
             # --- PHASE 1: IMAGE MARATHON ---
             await self.set_flow_options(page, mode="IMAGE")
             
-            # [NEW] Step 0: Upload Reference Anchor if provided
-            ref_path = getattr(self, 'ref_image_path', None)
-            if ref_path:
-                full_ref_path = os.path.abspath(ref_path)
-                print(f"[GhostEngine] Checking for Starting Reference: {full_ref_path}")
-                if os.path.exists(full_ref_path):
-                    await self.perform_reference_upload(page, full_ref_path)
-                else:
-                    print(f"[GhostEngine] Warning: Reference image not found at {full_ref_path}")
-            else:
-                print("[GhostEngine] No starting reference provided. Proceeding with fresh generation.")
-            
+            # [NEW] The reference upload is handled robustly inside the Phase 1 loop.
             self._update_ledger("IN_PROGRESS IMG")
             self.update_state("Starting Phase 1: Image Marathon", "IMAGE_PHASE", 0)
 
-            for i, scene in enumerate(scenes):
+            # Build generation tasks
+            generation_tasks = []
+            if getattr(self, 'is_new_format', False):
+                for i, scene in enumerate(scenes):
+                    generation_tasks.append({ "scene": scene, "scene_idx": i, "prompt_key": "image_prompt_start", "label": f"Scene {i+1} Start" })
+                    generation_tasks.append({ "scene": scene, "scene_idx": i, "prompt_key": "image_prompt_end", "label": f"Scene {i+1} End" })
+            else:
+                for i, scene in enumerate(scenes):
+                    generation_tasks.append({ "scene": scene, "scene_idx": i, "prompt_key": "image_prompt", "label": f"Scene {i+1}" })
+
+            for gen_idx, task in enumerate(generation_tasks):
                 if not self.is_running: break
                 
-                image_prompt = self.get_field(scene, "image_prompt")
+                image_prompt = self.get_field(task["scene"], task["prompt_key"])
                 if not image_prompt:
-                    self.update_state(f"Skipping Scene {i+1} (No image prompt)", "IMAGE_PHASE")
+                    self.update_state(f"Skipping {task['label']} (No image prompt)", "IMAGE_PHASE")
                     continue
 
                 # --- GENERATION SHIELD: 3-ATTEMPT RETRY LOOP (v12.2.2) ---
                 for attempt in range(1, 4):
                     if not self.is_running: break
                     
-                    self.update_state(f"Generating Scene {i+1} (Attempt {attempt}/3)...", "IMAGE_PHASE", i+1)
+                    self.update_state(f"Generating {task['label']} (Attempt {attempt}/3)...", "IMAGE_PHASE", gen_idx+1)
                     
                     if attempt > 1:
                         self.update_state(f"Recovery Refresh (Attempt {attempt})...", "WARNING")
@@ -645,9 +658,10 @@ class GhostEngine:
                         await self.set_flow_options(page, mode="IMAGE")
 
                     # --- THE EVOLUTIONARY HANDSHAKE ---
-                    success = await self.perform_reference_upload(page, mapping_choices.get('ref_image_path'), scene_num=i+1)
+                    ref_path = getattr(self, 'ref_image_path', None)
+                    success = await self.perform_reference_upload(page, ref_path, scene_num=gen_idx+1)
                     if not success:
-                        self.update_state(f"Warning: Handshake failed for Scene {i+1}. Recovering...", "WARNING")
+                        self.update_state(f"Warning: Handshake failed for {task['label']}. Recovering...", "WARNING")
                         continue # Trigger Recovery Refresh (v12.2.3)
                     
                     # Pre-Seating safe focus
@@ -655,16 +669,16 @@ class GhostEngine:
                     await self.click_stealth(page, (750, 900)) 
                     
                     # Type and Trigger
-                    await self.type_stealth(page, textbox_sel, image_prompt, scene_num=i+1)
+                    await self.type_stealth(page, textbox_sel, image_prompt, scene_num=gen_idx+1)
                     await page.keyboard.press("Enter")
                     
                     # Wait for generation (v12.2.2)
                     status = await self.wait_for_asset_ready(page, index=0)
                     
                     if status == "READY":
-                        self.update_state(f"Scene {i+1} 100% CLEAR.", "IMAGE_PHASE", i+1)
+                        self.update_state(f"{task['label']} 100% CLEAR.", "IMAGE_PHASE", gen_idx+1)
                         if self.surveillance_enabled:
-                            asyncio.create_task(self.capture_asset_preview(page, index=0, scene_num=i+1, phase="IMAGE"))
+                            asyncio.create_task(self.capture_asset_preview(page, index=0, scene_num=gen_idx+1, phase="IMAGE"))
                         break # Success!
                     
                     # If we hit here, it failed or timed out
@@ -677,11 +691,11 @@ class GhostEngine:
                         elif "allow upload" in err_text or "minors" in err_text:
                             mapped_status = "MINORS ERROR"
                         
-                        self.update_state(f"CRITICAL FAILURE: Scene {i+1} failed after 3 attempts.", mapped_status)
+                        self.update_state(f"CRITICAL FAILURE: {task['label']} failed after 3 attempts.", mapped_status)
                         import sys
                         sys.exit(1) # Hard fail for Sentinel
                     
-                    self.update_state(f"Scene {i+1} {status}. Retrying with Refresh...", "WARNING")
+                    self.update_state(f"{task['label']} {status}. Retrying with Refresh...", "WARNING")
                     await asyncio.sleep(2.0)
                 
                 # --- STABILIZATION PAUSE ---
@@ -721,34 +735,44 @@ class GhostEngine:
                             # Re-verify flow options for video mode
                             await self.set_flow_options(page, mode="VIDEO")
 
+                            # Determine indices based on format
+                            if getattr(self, 'is_new_format', False):
+                                start_idx_for_video = (i * 2) + 1
+                                end_idx_for_video = (i * 2) + 2
+                                has_end_frame = (i + 1 < len(scenes)) # New format skips last scene's end frame
+                            else:
+                                start_idx_for_video = i + 1
+                                end_idx_for_video = i + 2
+                                has_end_frame = (i + 1 < len(scenes)) # Old format skips last scene's end frame
+
                             # --- Start process ---
-                            # Click Start to select referance image (i-1))
+                            # Click Start to select referance image
                             start = page.locator('div[type=button]').first
                             await self.click_stealth(page, start)
                             
-                            self.update_state("Selecting start video ref", "STARTUP")
+                            self.update_state(f"Selecting start video ref (Index {start_idx_for_video})", "STARTUP")
 
-                            # Start gallories panel ->select Index i+1 (index0 = ref image)
+                            # Start gallories panel ->select Index
                             asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
                             
-                            tgt_start = asset.locator('> div').nth(i+1)
+                            tgt_start = asset.locator('> div').nth(start_idx_for_video)
                             await asyncio.sleep(1.0)
                             await self.click_stealth(page, tgt_start)
 
                             # --- END process ---
                             
-                            # last video check (start will always empthy)
-                            if(i+1 < total_images):
+                            # last video check
+                            if has_end_frame:
 
-                                # Click Start to select referance image (i-1))
+                                # Click End to select referance image
                                 end = page.locator('div[type="button"]').first
                                 await self.click_stealth(page, end)
                                 
-                                self.update_state("Selecting end video ref", "STARTUP")
+                                self.update_state(f"Selecting end video ref (Index {end_idx_for_video})", "STARTUP")
 
-                                # End gallories panel -> select Index i+2 (index0 = ref image)
+                                # End gallories panel -> select Index
                                 asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
-                                tgt_end = asset.locator('> div').nth(i+2)
+                                tgt_end = asset.locator('> div').nth(end_idx_for_video)
                                 await asyncio.sleep(1.0)
                                 await self.click_stealth(page, tgt_end)
                       

@@ -5,6 +5,8 @@ import re
 # Both Parser and Ghost Engine will reference this or these patterns
 DEFAULT_SCHEMA = {
     "image_prompt": ["image_prompt", "img_prompt", "prompt_image", "visual_prompt", "scene_visuals"],
+    "image_prompt_start": ["image_prompt_start", "prompt_start", "start_image"],
+    "image_prompt_end": ["image_prompt_end", "prompt_end", "end_image"],
     "video_prompt": ["video_motion_prompt", "video_prompt", "motion_prompt", "video_script", "action_prompt"]
 }
 
@@ -23,15 +25,22 @@ class StoryboardParser:
         Returns a compatibility report.
         """
         scenes = self.data.get("storyboard", [])
+        json_format = "Old Format (storyboard)"
+        if not scenes:
+            scenes = self.data.get("scenes", [])
+            if scenes:
+                json_format = "New Format (scenes)"
+
         report = {
             "scene_count": len(scenes),
-            "mapped_keys": {"image_prompt": None, "video_prompt": None},
+            "mapped_keys": {"image_prompt": None, "image_prompt_start": None, "image_prompt_end": None, "video_prompt": None},
             "discovered_keys": [],
-            "status": "READY"
+            "status": "READY",
+            "json_format": json_format
         }
         
         if not scenes:
-            report["status"] = "ERROR: No 'storyboard' list found."
+            report["status"] = "ERROR: No 'storyboard' or 'scenes' list found."
             return report
 
         # 1. Identify existing mapped keys
@@ -54,7 +63,7 @@ class StoryboardParser:
                         "suggestion": "image_prompt" if "visual" in key.lower() or "look" in key.lower() else "video_prompt"
                     })
 
-        if not report["mapped_keys"]["image_prompt"]:
+        if not report["mapped_keys"]["image_prompt"] and not report["mapped_keys"]["image_prompt_start"]:
             report["status"] = "WARNING: No primary Image Prompt found."
             
         return report
@@ -63,16 +72,31 @@ class StoryboardParser:
         """Identifies potential character names from prompts."""
         potential_characters = set()
         # Find which key contains our best text for extraction
-        text_key = self.verify_compatibility()["mapped_keys"]["image_prompt"] or "image_prompt"
+        verify_report = self.verify_compatibility()
+        text_keys = []
+        if verify_report["mapped_keys"].get("image_prompt"):
+            text_keys.append(verify_report["mapped_keys"]["image_prompt"])
+        if verify_report["mapped_keys"].get("image_prompt_start"):
+            text_keys.append(verify_report["mapped_keys"]["image_prompt_start"])
+        if verify_report["mapped_keys"].get("image_prompt_end"):
+            text_keys.append(verify_report["mapped_keys"]["image_prompt_end"])
+            
+        if not text_keys:
+            text_keys = ["image_prompt"]
+            
+        scenes = self.data.get("storyboard", [])
+        if not scenes:
+            scenes = self.data.get("scenes", [])
         
-        for scene in self.data.get("storyboard", []):
-            prompt = scene.get(text_key, "")
-            matches = re.findall(r'\b([A-Z][a-z]+)\b', prompt)
-            noise = ["The", "A", "And", "She", "It", "They", "Then", "When", "There", "He", "Her", "His"]
-            for match in matches:
-                if match not in noise:
-                    potential_characters.add(match)
-            if "Mali" in prompt: potential_characters.add("Mali")
-            if "Mom" in prompt: potential_characters.add("Mom")
+        for scene in scenes:
+            for text_key in text_keys:
+                prompt = scene.get(text_key, "")
+                matches = re.findall(r'\b([A-Z][a-z]+)\b', prompt)
+                noise = ["The", "A", "And", "She", "It", "They", "Then", "When", "There", "He", "Her", "His"]
+                for match in matches:
+                    if match not in noise:
+                        potential_characters.add(match)
+                if "Mali" in prompt: potential_characters.add("Mali")
+                if "Mom" in prompt: potential_characters.add("Mom")
 
         return sorted(list(potential_characters))

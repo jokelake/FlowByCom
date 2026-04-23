@@ -40,3 +40,11 @@ RUN_260423100201,2026-04-23 10:02:01,2026-04-23-10-00_sample_gemeni_prompt.json,
 RUN_260423100207,2026-04-23 10:02:07,2026-04-23-10-00_sample_gemeni_prompt.json,น้องมะลิจอมพลังแห่งความดี,2,10,10,ref_ref1.jpg,Initializing...,ERROR (Crashed)
 RUN_260423101248,2026-04-23 10:12:48,2026-04-23-10-12_sample_gemeni_prompt.json,น้องมะลิจอมพลังแห่งความดี,2,10,10,ref_ref_AFF.png,https://labs.google/fx/tools/flow/project/ebaf5f18-7606-484a-a116-3a51cbd20c5d,ERROR (Crashed)
 RUN_260423102046,2026-04-23 10:20:46,2026-04-23-10-20_sample_gemeni_prompt.json,น้องมะลิจอมพลังแห่งความดี,2,10,10,ref_ref_AFF.png,https://labs.google/fx/tools/flow/project/f6ac15e0-5c8e-40d9-b853-f01d0b8e46fe,COMPLETE
+RUN_260423110233,2026-04-23 11:02:33,2026-04-23-11-02_sample_gemeni_prompt_elephant_1.json,น้องช้างจอมพลังแห่งความดี,2,1,1,ref_ref_elephant.jpg,https://labs.google/fx/tools/flow/project/cd98347b-acd0-4468-ba38-3d28c4778e37,COMPLETE
+RUN_260423174019,2026-04-23 17:40:19,2026-04-23-17-39_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/8a8a6816-fae7-4eba-a67a-e48fe95c01d3,FAIL
+RUN_260423181048,2026-04-23 18:10:48,2026-04-23-18-10_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/6e4f46d1-8990-439e-8925-96d369eb74c5,FAIL
+RUN_260423185314,2026-04-23 18:53:14,2026-04-23-18-53_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/b1f616f3-531b-4cca-a7ed-c48825c85cf2,FAIL
+RUN_260423191635,2026-04-23 19:16:35,2026-04-23-19-16_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/aba23346-c7ec-402d-9d79-9bb1a4177142,FAIL
+RUN_260423191712,2026-04-23 19:17:12,2026-04-23-19-17_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/455c2a42-95da-4228-8ec4-eee516ca558b,FAIL
+RUN_260423192222,2026-04-23 19:22:22,2026-04-23-19-22_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/4b6d0e51-3915-4cb0-9015-82c8f53d9afc,FAIL
+RUN_260423193815,2026-04-23 19:38:15,2026-04-23-19-38_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/7f7768d4-9752-4a63-b6a9-a21031db43df,COMPLETE
