@@ -261,7 +261,8 @@ class GhostEngine:
                 
                 # --- PHASE 1: PROGRESS DETECTION (v12.2.4) ---
                 # Check for percentage text overlay (e.g. "50%", "100%")
-                # If percentage is present, the asset is ACTIVELY rendering and is NOT a failure.
+                # We check this FIRST because the UI contains hidden 'Failed'/'Delete' buttons during upload.
+                # As long as a percentage is present, it is actively rendering.
                 percentage_match = re.search(r'\d+\s?%', content)
                 
                 if percentage_match:
@@ -273,7 +274,7 @@ class GhostEngine:
                 # Only check for errors if no progress percentage is visible.
                 # Includes specific policy/upload violation signals (v12.2.6).
                 error_signals = [
-                    "something went wrong", "fail to", "failed to", "error", 
+                    "something went wrong", "failed", "fail to", "error", 
                     "unable to generation", "unusual activity", "noted some",
                     "violate", "policies", "harmful content", "different prompt",
                     "different image", "do not allow", "minors", "violation"
@@ -296,10 +297,48 @@ class GhostEngine:
         """Ensures the correct Mode, Ratio, and Quantity are selected."""
         try:
             self.update_state(f"Setting {mode} configuration...", "CONFIG")
-            # The settings button is named by the current model
-            trigger = page.locator('button[id^="radix-"]:has-text("Banana"), button[id^="radix-"]:has-text("Video"), button[id^="radix-"]:has-text("Veo")').first
-            await trigger.click()
-            await page.wait_for_timeout(1000)
+            
+            # --- SELF HEALING MENU SEARCH ---
+            # Check if the menu is already open
+            image_tab = page.locator('button[id$="-trigger-IMAGE"]').first
+            video_tab = page.locator('button[id$="-trigger-VIDEO"]').first
+            await page.reload()
+            
+            trigger = None
+            if await image_tab.is_visible() or await video_tab.is_visible():
+                trigger = True # Flag as found
+            else:
+                self.update_state("Searching for settings trigger...", "CONFIG")
+                # Wait for at least one popup trigger to be in the DOM
+                potential_triggers = page.locator('button[aria-haspopup="menu"], button[aria-haspopup="dialog"]')
+                try:
+                    await potential_triggers.first.wait_for(state="visible", timeout=10000)
+                except:
+                    pass
+                    
+                count = await potential_triggers.count()
+                
+                for i in range(count - 1, -1, -1):
+                    btn = potential_triggers.nth(i)
+                    if not await btn.is_visible():
+                        continue
+                    
+                    try:
+                        await btn.click()
+                        await page.wait_for_timeout(600)
+                    except:
+                        continue
+                        
+                    if await image_tab.is_visible() or await video_tab.is_visible():
+                        trigger = btn
+                        break # Found it! Menu is now OPEN.
+                        
+                    # Wrong menu, close it
+                    await page.keyboard.press("Escape")
+                    await page.wait_for_timeout(300)
+                    
+            if not trigger:
+                raise Exception("Self-Healing Search Failed: Could not locate the settings trigger.")
 
             # 1. Select Mode (Image or Video)
             mode_btn = page.locator(f'button[id$="-trigger-{mode}"]')
@@ -307,21 +346,21 @@ class GhostEngine:
             await page.wait_for_timeout(500)
 
             # 3. Select Ratio (9:16)
-            ratio_btn = page.locator('button:has-text("9:16"), [role="tab"]:has-text("9:16")').first
+            ratio_btn = page.locator('button[id$="-trigger-PORTRAIT"]').first
             await ratio_btn.click()
 
             # 4. Select Quantity (x1)
             # Use specific role="tab" to avoid conflict with the main trigger text
-            qty_btn = page.locator('[role="tab"]:has-text("x1")').first
+            qty_btn = page.locator('button[id$="-trigger-1"]').first
             await qty_btn.click()
 
             # 5. Hard Close menu (using Escape to ensure poppers vanish)
             await page.keyboard.press("Escape")
             await page.wait_for_timeout(1000)
             
-            # Final check: if trigger still has 'expanded' state, click it again
-            if await trigger.get_attribute("aria-expanded") == "true":
-                await trigger.click()
+            # Final check: ensure menu is closed by checking if the tab is still visible
+            if await page.locator('button[id$="-trigger-IMAGE"]').first.is_visible():
+                await page.keyboard.press("Escape")
                 await page.wait_for_timeout(500)
                 
             return True
@@ -413,7 +452,6 @@ class GhostEngine:
                     break 
                 elif attempt < 2:
                     self.update_state(f"Start button not visible. Refreshing page (Attempt {attempt+1}/2)...", "WARNING")
-                    await page.reload()
                     await self.set_flow_options(page, mode="VIDEO")
                     await asyncio.sleep(3.0)
                 else:
@@ -440,7 +478,6 @@ class GhostEngine:
                         break
                     elif attempt < 2:
                         self.update_state(f"End button not visible. Refreshing page...", "WARNING")
-                        await page.reload()
                         await self.set_flow_options(page, mode="VIDEO")
                         await asyncio.sleep(3.0)
                     else:
@@ -474,7 +511,7 @@ class GhostEngine:
         self.flow_project_url = "Initializing..."
         
         # Initial Clock-In
-        self._update_ledger("IN_PROGRESS")
+        self._update_ledger("IN_PROGRESS 0")
         storyboard_data = self.load_storyboard()
         scenes = storyboard_data.get("storyboard", [])
         self.total_scenes = len(scenes)
@@ -552,7 +589,7 @@ class GhostEngine:
                 # Click to focus the canvas
                 await textbox.click()
                 self.flow_project_url = page.url 
-                self._update_ledger("IN_PROGRESS")
+                self._update_ledger("IN_PROGRESS 1")
                 self.update_state("Workspace Fully Initialized!", "STARTUP")
                 
                 # Milestone: Workspace Ready (v12.0.7 Relocated)
@@ -585,6 +622,7 @@ class GhostEngine:
             else:
                 print("[GhostEngine] No starting reference provided. Proceeding with fresh generation.")
             
+            self._update_ledger("IN_PROGRESS IMG")
             self.update_state("Starting Phase 1: Image Marathon", "IMAGE_PHASE", 0)
 
             for i, scene in enumerate(scenes):
@@ -603,7 +641,6 @@ class GhostEngine:
                     
                     if attempt > 1:
                         self.update_state(f"Recovery Refresh (Attempt {attempt})...", "WARNING")
-                        await page.reload()
                         await asyncio.sleep(5.0) # Requested 5s wait
                         await self.set_flow_options(page, mode="IMAGE")
 
@@ -655,6 +692,7 @@ class GhostEngine:
             # PHASE 2: MOTION MARATHON (Cinematic Bridging)
             # =========================================================================
             if self.is_running:
+                self._update_ledger("IN_PROGRESS VID")
                 self.update_state("Entering Phase 2: Motion Marathon...", "VIDEO_PHASE")
                 total_images = len(scenes)
                 
@@ -682,18 +720,40 @@ class GhostEngine:
                         try:
                             # Re-verify flow options for video mode
                             await self.set_flow_options(page, mode="VIDEO")
+
+                            # --- Start process ---
+                            # Click Start to select referance image (i-1))
+                            start = page.locator('div[type=button]').first
+                            await self.click_stealth(page, start)
                             
-                            # Hover the nth image to reveal the "Video" button
-                            asset = page.locator('[data-testid="virtuoso-item-list"] > div').nth(0)
-                            await asset.hover()
-                            await page.wait_for_timeout(500)
+                            self.update_state("Selecting start video ref", "STARTUP")
+
+                            # Start gallories panel ->select Index i+1 (index0 = ref image)
+                            asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
                             
-                            # Click the video trigger overlay
-                            await self.click_stealth(page, '[data-testid="asset-video-trigger"]')
-                            await page.wait_for_timeout(1000)
+                            tgt_start = asset.locator('> div').nth(i+1)
+                            await asyncio.sleep(1.0)
+                            await self.click_stealth(page, tgt_start)
+
+                            # --- END process ---
                             
+                            # last video check (start will always empthy)
+                            if(i+1 < total_images):
+
+                                # Click Start to select referance image (i-1))
+                                end = page.locator('div[type="button"]').first
+                                await self.click_stealth(page, end)
+                                
+                                self.update_state("Selecting end video ref", "STARTUP")
+
+                                # End gallories panel -> select Index i+2 (index0 = ref image)
+                                asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
+                                tgt_end = asset.locator('> div').nth(i+2)
+                                await asyncio.sleep(1.0)
+                                await self.click_stealth(page, tgt_end)
+                      
                             # Type prompt and Bridge
-                            await self.type_stealth(page, 'textarea[placeholder*="video"]', video_prompt, scene_num=i+1)
+                            await self.type_stealth(page, "div[role='textbox']", video_prompt, scene_num=i+1)
                             await page.keyboard.press("Enter")
                             
                             # Wait for Rendering

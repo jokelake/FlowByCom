@@ -39,6 +39,29 @@ for d in [UPLOAD_DIR, STORYBOARD_DIR, OUTPUT_DIR, PREVIEWS_DIR]:
     if not os.path.exists(d):
         os.makedirs(d)
 
+# Startup Ledger Cleanup (v12.2.8)
+# If the server was shut down abruptly, mark any stuck 'IN_PROGRESS' items as 'ERROR (Crashed)'.
+ledger_path = os.path.join(OUTPUT_DIR, "production_ledger.csv")
+if os.path.exists(ledger_path):
+    try:
+        rows = []
+        with open(ledger_path, "r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            headers = reader.fieldnames
+            if headers:
+                for row in reader:
+                    st = row.get("status", "")
+                    if "IN_PROGRESS" in st or st == "RUNNING":
+                        row["status"] = "ERROR (Crashed)"
+                    rows.append(row)
+        with open(ledger_path, "w", encoding="utf-8-sig", newline="") as f:
+            if headers:
+                writer = csv.DictWriter(f, fieldnames=headers)
+                writer.writeheader()
+                writer.writerows(rows)
+    except Exception as e:
+        print(f"[Backend] Startup ledger cleanup error: {e}")
+
 MARATHON_QUEUE_FILE = "marathon_queue.json"
 if not os.path.exists(MARATHON_QUEUE_FILE):
     with open(MARATHON_QUEUE_FILE, "w") as f:
@@ -227,14 +250,14 @@ def worker_action(worker_id: str, action: str):
                 production_workers[worker_id] = None
             except: pass
         
-        # Re-queue the paused job back to PENDING so it can be resumed
+        # Mark the job as PAUSED so it doesn't get picked up by another worker
         with queue_lock:
             with open(MARATHON_QUEUE_FILE, "r") as f:
                 queue = json.load(f)
             for job in queue:
                 if job["status"] == "PROCESSING" and job.get("worker") == worker_id:
-                    job["status"] = "PENDING"
-                    job["worker"] = None
+                    job["status"] = "PAUSED"
+                    # Keep job["worker"] = worker_id so it resumes on the same lane
                     break
             with open(MARATHON_QUEUE_FILE, "w") as f:
                 json.dump(queue, f, indent=4)
@@ -274,7 +297,7 @@ def worker_action(worker_id: str, action: str):
                     reader = csv.DictReader(f)
                     headers = reader.fieldnames
                     for row in reader:
-                        if row.get("status") in ("IN_PROGRESS", "RUNNING") and row not in rows:
+                        if row.get("status") and ("IN_PROGRESS" in row.get("status") or row.get("status") == "RUNNING") and row not in rows:
                             row["status"] = "FAIL"
                         rows.append(row)
                 with open(ledger_path, "w", encoding="utf-8-sig", newline="") as f:
@@ -288,6 +311,17 @@ def worker_action(worker_id: str, action: str):
         return {"status": "TERMINATED", "worker": worker_id}
         
     elif action == "resume":
+        # Change the PAUSED job back to PENDING so the sentinel can pick it up
+        with queue_lock:
+            with open(MARATHON_QUEUE_FILE, "r") as f:
+                queue = json.load(f)
+            for job in queue:
+                if job["status"] == "PAUSED" and job.get("worker") == worker_id:
+                    job["status"] = "PENDING"
+                    break
+            with open(MARATHON_QUEUE_FILE, "w") as f:
+                json.dump(queue, f, indent=4)
+                
         worker_lane_locked[worker_id] = False
         return {"status": "ACTIVE", "worker": worker_id}
 
@@ -443,7 +477,8 @@ def queue_sentinel():
                     continue
 
                 if not production_workers[wid] or production_workers[wid].poll() is not None:
-                    pending_idx = next((i for i, j in enumerate(queue) if j["status"] == "PENDING"), None)
+                    # Only pick up jobs with no worker assigned, or jobs specifically assigned to this worker (resumed jobs)
+                    pending_idx = next((i for i, j in enumerate(queue) if j["status"] == "PENDING" and (not j.get("worker") or j.get("worker") == wid)), None)
                     
                     if pending_idx is not None:
                         job = queue[pending_idx]

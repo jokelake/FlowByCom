@@ -438,6 +438,7 @@
         .status-badge { font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 99px; }
         .status-pending { background: rgba(100,116,139,0.3); color: #94a3b8; }
         .status-processing { background: rgba(99,102,241,0.3); color: #818cf8; }
+        .status-paused { background: rgba(245,158,11,0.3); color: #fbbf24; }
         .worker-badge { background: #6366f1; color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 3px; }
         
         .btn-remove-job {
@@ -1166,7 +1167,7 @@
             const queue = await resp.json();
 
             // Split into stages
-            const activeJobs = queue.filter(j => j.status === 'PENDING' || j.status === 'PROCESSING');
+            const activeJobs = queue.filter(j => j.status === 'PENDING' || j.status === 'PROCESSING' || j.status === 'PAUSED');
             const completedJobs = queue.filter(j => j.status === 'COMPLETE');
             const failedJobs = queue.filter(j => j.status === 'FAILED');
 
@@ -1192,7 +1193,7 @@
                     <div class="job-title">${sbName}</div>
                     <img src="${refImg}" onerror="this.src='https://placehold.co/140x70/1e293b/475569?text=No+Ref'">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.3rem;">
-                        <span class="status-badge ${job.status === 'PROCESSING' ? 'status-processing' : 'status-pending'}">
+                        <span class="status-badge ${job.status === 'PROCESSING' ? 'status-processing' : (job.status === 'PAUSED' ? 'status-paused' : 'status-pending')}">
                             ${job.worker ? `<span class="worker-badge">W${job.worker}</span> ` : ''}${job.status}
                         </span>
                     </div>
@@ -1283,8 +1284,35 @@
             await fetch(`/worker/action?worker_id=${wid}&action=terminate`, { method: 'POST' });
             refreshQueue();
             fetchLedger();
+            clearSetupForm();
             // Brief delay then poll to update worker UI to standby
             setTimeout(pollStatus, 800);
+        }
+
+        function clearSetupForm() {
+            currentStoryboardPath = "";
+            currentRefImagePath = "";
+            totalScenes = 0;
+            discoveredSchema = {};
+            localStorage.removeItem('vid_storyboard');
+            localStorage.removeItem('vid_ref_image');
+            localStorage.removeItem('vid_schema');
+            localStorage.removeItem('vid_summary');
+            localStorage.removeItem('vid_total_scenes');
+            
+            const storyboardFile = document.getElementById('storyboardFile');
+            if(storyboardFile) storyboardFile.value = "";
+            const refImage = document.getElementById('refImage');
+            if(refImage) refImage.value = "";
+            
+            document.getElementById('summaryDetails').innerHTML = "Analyzing sequence details...";
+            document.getElementById('mappingSection').style.display = "none";
+            document.getElementById('referenceSection').style.display = "none";
+            document.getElementById('refPreview').style.display = "none";
+            document.getElementById('previewImg').src = "";
+            document.getElementById('readyBadge').style.display = "none";
+            document.getElementById('uploadStatus').innerText = "Waiting for reference...";
+            document.getElementById('uploadStatus').style.color = "#fbbf24";
         }
 
         async function workerAction(wid, action) {

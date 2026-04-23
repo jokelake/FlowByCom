@@ -1,36 +1,14 @@
-2026/04/22-00:18:15.769 2cb4 Reusing MANIFEST C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile\Profile 2\IndexedDB\https_labs.google_0.indexeddb.leveldb/MANIFEST-000001
-2026/04/22-00:18:15.769 2cb4 Recovering log #19
-2026/04/22-00:18:15.769 2cb4 Reusing old log C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile\Profile 2\IndexedDB\https_labs.google_0.indexeddb.leveldb/000019.log 
-2026/04/22-00:18:15.770 2cb4 Delete type=2 #17
-2026/04/22-00:18:15.802 4ed8 Level-0 table #24: started
-2026/04/22-00:18:15.805 4ed8 Level-0 table #24: 1178 bytes OK
-2026/04/22-00:18:15.808 4ed8 Delete type=0 #19
-2026/04/22-00:18:15.809 190c Manual compaction at level-0 from '\x00\x0a\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0b\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0a\x00\x00\x05' @ 553 : 1
-2026/04/22-00:18:15.809 190c Compacting 1@0 + 1@1 files
-2026/04/22-00:18:15.812 190c Generated table #25@0: 168 keys, 3493 bytes
-2026/04/22-00:18:15.812 190c Compacted 1@0 + 1@1 files => 3493 bytes
-2026/04/22-00:18:15.814 190c compacted to: files[ 0 1 1 0 0 0 0 ]
-2026/04/22-00:18:15.814 190c Delete type=2 #24
-2026/04/22-00:18:15.815 190c Manual compaction at level-0 from '\x00\x0a\x00\x00\x05' @ 553 : 1 .. '\x00\x0b\x00\x00\x00' @ 0 : 0; will stop at (end)
-2026/04/22-00:18:17.702 4ed8 Level-0 table #27: started
-2026/04/22-00:18:17.707 4ed8 Level-0 table #27: 1161 bytes OK
-2026/04/22-00:18:17.709 4ed8 Delete type=2 #21
-2026/04/22-00:18:17.709 4ed8 Delete type=0 #23
-2026/04/22-00:18:17.710 190c Manual compaction at level-0 from '\x00\x0b\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0c\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0b\x00\x00\x05' @ 584 : 1
-2026/04/22-00:18:17.710 190c Compacting 1@0 + 1@1 files
-2026/04/22-00:18:17.713 190c Generated table #28@0: 172 keys, 3513 bytes
-2026/04/22-00:18:17.713 190c Compacted 1@0 + 1@1 files => 3513 bytes
-2026/04/22-00:18:17.714 190c compacted to: files[ 0 1 1 0 0 0 0 ]
-2026/04/22-00:18:17.714 190c Delete type=2 #27
-2026/04/22-00:18:17.715 190c Manual compaction at level-0 from '\x00\x0b\x00\x00\x05' @ 584 : 1 .. '\x00\x0c\x00\x00\x00' @ 0 : 0; will stop at (end)
-2026/04/22-00:18:34.338 4ed8 Level-0 table #30: started
-2026/04/22-00:18:34.342 4ed8 Level-0 table #30: 1160 bytes OK
-2026/04/22-00:18:34.344 4ed8 Delete type=2 #25
-2026/04/22-00:18:34.344 4ed8 Delete type=0 #26
-2026/04/22-00:18:34.345 190c Manual compaction at level-0 from '\x00\x0c\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0d\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0c\x00\x00\x05' @ 615 : 1
-2026/04/22-00:18:34.345 190c Compacting 1@0 + 1@1 files
-2026/04/22-00:18:34.348 190c Generated table #31@0: 172 keys, 3513 bytes
-2026/04/22-00:18:34.348 190c Compacted 1@0 + 1@1 files => 3513 bytes
-2026/04/22-00:18:34.351 190c compacted to: files[ 0 1 1 0 0 0 0 ]
-2026/04/22-00:18:34.352 190c Delete type=2 #30
-2026/04/22-00:18:34.353 190c Manual compaction at level-0 from '\x00\x0c\x00\x00\x05' @ 615 : 1 .. '\x00\x0d\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/04/21-23:39:53.306 a6c Reusing MANIFEST C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile\Profile 2\IndexedDB\https_labs.google_0.indexeddb.leveldb/MANIFEST-000001
+2026/04/21-23:39:53.306 a6c Recovering log #15
+2026/04/21-23:39:53.307 a6c Reusing old log C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile\Profile 2\IndexedDB\https_labs.google_0.indexeddb.leveldb/000015.log 
+2026/04/21-23:39:53.307 a6c Delete type=2 #14
+2026/04/21-23:39:53.344 1b08 Level-0 table #20: started
+2026/04/21-23:39:53.349 1b08 Level-0 table #20: 1177 bytes OK
+2026/04/21-23:39:53.351 1b08 Delete type=0 #15
+2026/04/21-23:39:53.351 a6c Manual compaction at level-0 from '\x00\x09\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0a\x00\x00\x00' @ 0 : 0; will stop at '\x00\x09\x00\x00\x05' @ 522 : 1
+2026/04/21-23:39:53.351 a6c Compacting 1@0 + 1@1 files
+2026/04/21-23:39:53.354 a6c Generated table #21@0: 168 keys, 3495 bytes
+2026/04/21-23:39:53.354 a6c Compacted 1@0 + 1@1 files => 3495 bytes
+2026/04/21-23:39:53.356 a6c compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/04/21-23:39:53.357 a6c Delete type=2 #20
+2026/04/21-23:39:53.357 a6c Manual compaction at level-0 from '\x00\x09\x00\x00\x05' @ 522 : 1 .. '\x00\x0a\x00\x00\x00' @ 0 : 0; will stop at (end)
