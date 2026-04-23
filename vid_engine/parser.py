@@ -7,7 +7,8 @@ DEFAULT_SCHEMA = {
     "image_prompt": ["image_prompt", "img_prompt", "prompt_image", "visual_prompt", "scene_visuals"],
     "image_prompt_start": ["image_prompt_start", "prompt_start", "start_image"],
     "image_prompt_end": ["image_prompt_end", "prompt_end", "end_image"],
-    "video_prompt": ["video_motion_prompt", "video_prompt", "motion_prompt", "video_script", "action_prompt"]
+    "video_prompt": ["video_motion_prompt", "video_prompt", "motion_prompt", "video_script", "action_prompt"],
+    "transition_video_prompt": ["transition_video_prompt", "transition_prompt"]
 }
 
 class StoryboardParser:

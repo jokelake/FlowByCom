@@ -34,6 +34,8 @@ class GhostEngine:
         self.creation_mode = "REGULAR"
         self.surveillance_enabled = True # v10.4.2
         self.last_thumbnail = ""
+        self.video_duration = "8"
+        self.transition_duration = "4"
         
         # [v11.2.3] Ledger Synchronization State
         self.run_id = None
@@ -61,6 +63,11 @@ class GhostEngine:
             self.ref_image_path = data.get("ref_image_path")
             self.creation_mode = data.get("creation_mode", "REGULAR") # v10.2 Mode Support
             self.surveillance_enabled = data.get("surveillance_enabled", True) # v10.4.2
+            
+            # Store durations (v12.3)
+            self.video_duration = choices.get("video_duration", "8")
+            self.transition_duration = choices.get("transition_duration", "4")
+            
             return choices
         
     def load_storyboard(self):
@@ -277,9 +284,10 @@ class GhostEngine:
                 # Includes specific policy/upload violation signals (v12.2.6).
                 error_signals = [
                     "something went wrong", "failed", "fail to", "error", 
-                    "unable to generation", "unusual activity", "noted some",
+                    "unable to generation", "unusual activity", "help center", "noted some",
                     "violate", "policies", "harmful content", "different prompt",
-                    "different image", "do not allow", "minors", "violation"
+                    "different image", "do not allow", "minors", "violation",
+                    "help canter", "unusual activity"
                 ]
                 if any(sig in content.lower() for sig in error_signals):
                     self.update_state(f"Error Detected: Rendering Failure on Asset {index}.", "WARNING")
@@ -295,76 +303,80 @@ class GhostEngine:
 
         return "TIMEOUT"
 
-    async def set_flow_options(self, page, mode="IMAGE"):
-        """Ensures the correct Mode, Ratio, and Quantity are selected."""
+    async def set_flow_options(self, page, mode="IMAGE", duration="8"):
+        """Ensures the correct Mode, Ratio, Quantity, and Duration are selected with stealth."""
         try:
-            self.update_state(f"Setting {mode} configuration...", "CONFIG")
+            # 1. Check if we actually need to change anything (Stealth v12.4)
+            # We check the buttons' data-state if the menu is already open, 
+            # otherwise we just open it and check.
             
-            # --- SELF HEALING MENU SEARCH ---
-            # Check if the menu is already open
+            self.update_state(f"Verifying {mode} ({duration}s) configuration...", "CONFIG")
+            await asyncio.sleep(random.uniform(0.5, 1.5))
+
+            # --- OPEN MENU ---
             image_tab = page.locator('button[id$="-trigger-IMAGE"]').first
             video_tab = page.locator('button[id$="-trigger-VIDEO"]').first
-            await page.reload()
             
-            trigger = None
-            if await image_tab.is_visible() or await video_tab.is_visible():
-                trigger = True # Flag as found
-            else:
-                self.update_state("Searching for settings trigger...", "CONFIG")
-                # Wait for at least one popup trigger to be in the DOM
+            menu_already_open = await image_tab.is_visible()
+            
+            if not menu_already_open:
                 potential_triggers = page.locator('button[aria-haspopup="menu"], button[aria-haspopup="dialog"]')
-                try:
-                    await potential_triggers.first.wait_for(state="visible", timeout=10000)
-                except:
-                    pass
-                    
                 count = await potential_triggers.count()
-                
+                found = False
                 for i in range(count - 1, -1, -1):
                     btn = potential_triggers.nth(i)
-                    if not await btn.is_visible():
-                        continue
-                    
-                    try:
-                        await btn.click()
-                        await page.wait_for_timeout(600)
-                    except:
-                        continue
-                        
-                    if await image_tab.is_visible() or await video_tab.is_visible():
-                        trigger = btn
-                        break # Found it! Menu is now OPEN.
-                        
-                    # Wrong menu, close it
-                    await page.keyboard.press("Escape")
-                    await page.wait_for_timeout(300)
-                    
-            if not trigger:
-                raise Exception("Self-Healing Search Failed: Could not locate the settings trigger.")
+                    if await btn.is_visible():
+                        await self.click_stealth(page, btn)
+                        await page.wait_for_timeout(1000)
+                        if await image_tab.is_visible():
+                            found = True
+                            break
+                        else:
+                            await page.keyboard.press("Escape")
+                            await page.wait_for_timeout(500)
+                if not found:
+                    raise Exception("Could not open settings menu")
 
-            # 1. Select Mode (Image or Video)
+            # --- SELECT MODE ---
             mode_btn = page.locator(f'button[id$="-trigger-{mode}"]')
-            await mode_btn.click()
-            await page.wait_for_timeout(500)
+            if (await mode_btn.get_attribute("data-state")) != "active":
+                await asyncio.sleep(random.uniform(0.3, 0.7))
+                await mode_btn.click()
+                await page.wait_for_timeout(800)
 
-            # 3. Select Ratio (9:16)
+            # --- SELECT DURATION (Video Only) ---
+            if mode == "VIDEO":
+                duration_locs = page.locator(f'button[id$="-trigger-{duration}"]')
+                try:
+                    await duration_locs.first.wait_for(state="visible", timeout=2000)
+                except: pass
+                
+                # Check if correct duration is already active
+                is_active = False
+                if await duration_locs.count() > 0:
+                    # If there's a conflict (count > 1), we check the second one (usually the duration one)
+                    target_dur = duration_locs.nth(1) if await duration_locs.count() > 1 else duration_locs.first
+                    if (await target_dur.get_attribute("data-state")) == "active":
+                        is_active = True
+                    else:
+                        await asyncio.sleep(random.uniform(0.4, 0.8))
+                        await target_dur.click()
+                        await page.wait_for_timeout(600)
+
+            # --- SELECT RATIO & QUANTITY (Standardize) ---
             ratio_btn = page.locator('button[id$="-trigger-PORTRAIT"]').first
-            await ratio_btn.click()
-
-            # 4. Select Quantity (x1)
-            # Use specific role="tab" to avoid conflict with the main trigger text
-            qty_btn = page.locator('button[id$="-trigger-1"]').first
-            await qty_btn.click()
-
-            # 5. Hard Close menu (using Escape to ensure poppers vanish)
-            await page.keyboard.press("Escape")
-            await page.wait_for_timeout(1000)
-            
-            # Final check: ensure menu is closed by checking if the tab is still visible
-            if await page.locator('button[id$="-trigger-IMAGE"]').first.is_visible():
-                await page.keyboard.press("Escape")
+            if (await ratio_btn.get_attribute("data-state")) != "active":
+                await ratio_btn.click()
                 await page.wait_for_timeout(500)
                 
+            qty_btn = page.locator('button[id$="-trigger-1"]').first
+            if (await qty_btn.get_attribute("data-state")) != "active":
+                await qty_btn.click()
+                await page.wait_for_timeout(500)
+
+            # --- CLOSE MENU ---
+            await page.keyboard.press("Escape")
+            await page.wait_for_timeout(800)
             return True
         except Exception as e:
             self.update_state(f"Warning: Failed to set options: {e}")
@@ -451,7 +463,7 @@ class GhostEngine:
             self.update_state("Initiating Motion Bridge Handshake...", "ANCHORING")
             
             # --- 1. ENSURE VIDEO MODE ---
-            await self.set_flow_options(page, mode="VIDEO")
+            await self.set_flow_options(page, mode="VIDEO", duration=self.video_duration)
             await asyncio.sleep(random.uniform(1.0, 2.0))
             
 
@@ -465,7 +477,7 @@ class GhostEngine:
                     break 
                 elif attempt < 2:
                     self.update_state(f"Start button not visible. Refreshing page (Attempt {attempt+1}/2)...", "WARNING")
-                    await self.set_flow_options(page, mode="VIDEO")
+                    await self.set_flow_options(page, mode="VIDEO", duration=self.video_duration)
                     await asyncio.sleep(3.0)
                 else:
                     self.update_state("Can't find 'Start button' after 2 retries.", "ERROR")
@@ -491,7 +503,7 @@ class GhostEngine:
                         break
                     elif attempt < 2:
                         self.update_state(f"End button not visible. Refreshing page...", "WARNING")
-                        await self.set_flow_options(page, mode="VIDEO")
+                        await self.set_flow_options(page, mode="VIDEO", duration=self.video_duration)
                         await asyncio.sleep(3.0)
                     else:
                         self.update_state("Can't find 'End button' after 2 retries.", "ERROR")
@@ -580,6 +592,7 @@ class GhostEngine:
                 self.update_state("Creating New Project Canvas...", "STARTUP")
                 await self.click_stealth(page, 'button:has-text("New project")')
                 await page.wait_for_url("**/project/**", timeout=45000)
+                # self.flow_project_url = page.url # Capture deep-link
                 self.flow_project_url = page.url # Capture deep-link
                 await page.wait_for_timeout(5000) # Let canvas settle
 
@@ -728,18 +741,18 @@ class GhostEngine:
                             self.update_state(f"Recovery Refresh (Attempt {attempt})...", "WARNING")
                             await page.reload()
                             await asyncio.sleep(5.0) # Requested 5s wait
-                            await self.set_flow_options(page, mode="VIDEO")
+                            await self.set_flow_options(page, mode="VIDEO", duration=self.video_duration)
 
                         # Trigger Generation (Hover + Click asset)
                         try:
                             # Re-verify flow options for video mode
-                            await self.set_flow_options(page, mode="VIDEO")
+                            await self.set_flow_options(page, mode="VIDEO", duration=self.video_duration)
 
                             # Determine indices based on format
                             if getattr(self, 'is_new_format', False):
                                 start_idx_for_video = (i * 2) + 1
                                 end_idx_for_video = (i * 2) + 2
-                                has_end_frame = (i + 1 < len(scenes)) # New format skips last scene's end frame
+                                has_end_frame = True # New format ALWAYS has an end frame for each scene
                             else:
                                 start_idx_for_video = i + 1
                                 end_idx_for_video = i + 2
@@ -754,8 +767,17 @@ class GhostEngine:
 
                             # Start gallories panel ->select Index
                             asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
-                            
                             tgt_start = asset.locator('> div').nth(start_idx_for_video)
+                            
+                            # Scroll virtualized list if needed (Bulletproof method)
+                            for _ in range(15):
+                                if await tgt_start.count() > 0 and await tgt_start.is_visible():
+                                    break
+                                last_rendered = asset.locator('> div').last
+                                if await last_rendered.count() > 0:
+                                    await last_rendered.scroll_into_view_if_needed(timeout=1000)
+                                await asyncio.sleep(0.5)
+                                
                             await asyncio.sleep(1.0)
                             await self.click_stealth(page, tgt_start)
 
@@ -773,6 +795,16 @@ class GhostEngine:
                                 # End gallories panel -> select Index
                                 asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
                                 tgt_end = asset.locator('> div').nth(end_idx_for_video)
+                                
+                                # Scroll virtualized list if needed (Bulletproof method)
+                                for _ in range(15):
+                                    if await tgt_end.count() > 0 and await tgt_end.is_visible():
+                                        break
+                                    last_rendered = asset.locator('> div').last
+                                    if await last_rendered.count() > 0:
+                                        await last_rendered.scroll_into_view_if_needed(timeout=1000)
+                                    await asyncio.sleep(0.5)
+                                    
                                 await asyncio.sleep(1.0)
                                 await self.click_stealth(page, tgt_end)
                       
@@ -786,6 +818,10 @@ class GhostEngine:
                                 self.update_state(f"Video {i+1} 100% RENDERED.", "VIDEO_PHASE", i+1)
                                 if self.surveillance_enabled:
                                     asyncio.create_task(self.capture_asset_preview(page, index=0, scene_num=i+1, phase="VIDEO"))
+                                
+                                # --- HUMAN REVIEW PAUSE (Stealth v12.4.1) ---
+                                self.update_state("Simulating human review of rendered clip...", "VIDEO_PHASE")
+                                await asyncio.sleep(random.uniform(5.0, 10.0))
                                 break
                             
                             # If we hit here, the wait itself failed (status is FAILED or TIMEOUT)
@@ -797,6 +833,13 @@ class GhostEngine:
                                     mapped_status = "VIOLATE ERROR"
                                 elif "allow upload" in err_text or "minors" in err_text:
                                     mapped_status = "MINORS ERROR"
+                                elif "unusual activity" in err_text or "help center" in err_text or "help canter" in err_text:
+                                    mapped_status = "BOT DETECTED"
+                                    self.update_state("CRITICAL: Google detected unusual activity. Pausing for Cooldown...", "WARNING")
+                                    await asyncio.sleep(60) # Wait 1 minute
+                                    await page.reload()
+                                    await asyncio.sleep(10)
+                                    continue # Retry after cooldown
 
                                 self.update_state(f"CRITICAL FAILURE: Video {i+1} failed after 3 attempts.", mapped_status)
                                 import sys
@@ -807,6 +850,103 @@ class GhostEngine:
                         except Exception as e:
                             self.update_state(f"Motion Bridge Error: {e}. Retrying...", "WARNING")
                             await asyncio.sleep(2.0)
+                    
+                    # --- TRANSITION VIDEO BRIDGE (If Applicable) ---
+                    transition_video_prompt = self.get_field(scene, "transition_video_prompt")
+                    if transition_video_prompt and i < len(scenes) - 1:
+                        for attempt in range(1, 4):
+                            if not self.is_running: break
+                            
+                            self.update_state(f"Bridging Transition Video {i+1} -> {i+2} (Attempt {attempt}/3)...", "VIDEO_PHASE")
+                            
+                            if attempt > 1:
+                                self.update_state(f"Recovery Refresh (Transition Attempt {attempt})...", "WARNING")
+                                await page.reload()
+                                await asyncio.sleep(5.0)
+                                await self.set_flow_options(page, mode="VIDEO", duration=self.transition_duration)
+                            
+                            try:
+                                # 1. Set to VIDEO mode with transition duration
+                                await self.set_flow_options(page, mode="VIDEO", duration=self.transition_duration)
+                                
+                                start_idx_for_transition = (i * 2) + 2 # End of current scene
+                                end_idx_for_transition = ((i + 1) * 2) + 1 # Start of next scene
+                                
+                                # 2. Click Start and select transition start reference
+                                start = page.locator('div[type=button]').first
+                                await self.click_stealth(page, start)
+                                
+                                self.update_state(f"Selecting transition start ref (Index {start_idx_for_transition})", "STARTUP")
+                                
+                                asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
+                                tgt_start = asset.locator('> div').nth(start_idx_for_transition)
+                                
+                                for _ in range(15):
+                                    if await tgt_start.count() > 0 and await tgt_start.is_visible():
+                                        break
+                                    last_rendered = asset.locator('> div').last
+                                    if await last_rendered.count() > 0:
+                                        await last_rendered.scroll_into_view_if_needed(timeout=1000)
+                                    await asyncio.sleep(0.5)
+                                    
+                                await asyncio.sleep(1.0)
+                                await self.click_stealth(page, tgt_start)
+                                
+                                # 3. Click End and select transition end reference
+                                end = page.locator('div[type="button"]').first
+                                await self.click_stealth(page, end)
+                                
+                                self.update_state(f"Selecting transition end ref (Index {end_idx_for_transition})", "STARTUP")
+                                
+                                asset = page.locator('[data-testid="virtuoso-item-list"]').nth(1)
+                                tgt_end = asset.locator('> div').nth(end_idx_for_transition)
+                                
+                                for _ in range(15):
+                                    if await tgt_end.count() > 0 and await tgt_end.is_visible():
+                                        break
+                                    last_rendered = asset.locator('> div').last
+                                    if await last_rendered.count() > 0:
+                                        await last_rendered.scroll_into_view_if_needed(timeout=1000)
+                                    await asyncio.sleep(0.5)
+                                    
+                                await asyncio.sleep(1.0)
+                                await self.click_stealth(page, tgt_end)
+                                
+                                # 4. Type prompt and Bridge
+                                await self.type_stealth(page, "div[role='textbox']", transition_video_prompt, scene_num=i+1)
+                                await page.keyboard.press("Enter")
+                                
+                                # Wait for Rendering
+                                status = await self.wait_for_asset_ready(page, index=0)
+                                if status == "READY":
+                                    self.update_state(f"Transition {i+1} 100% RENDERED.", "VIDEO_PHASE")
+                                    
+                                    # --- HUMAN REVIEW PAUSE ---
+                                    await asyncio.sleep(random.uniform(3.0, 6.0))
+                                    
+                                    # 5. Restore duration for the next normal scene
+                                    await self.set_flow_options(page, mode="VIDEO", duration=self.video_duration)
+                                    break
+                                
+                                if attempt == 3:
+                                    self.update_state(f"CRITICAL FAILURE: Transition {i+1} failed after 3 attempts.", "ERROR")
+                                    import sys
+                                    sys.exit(1)
+                                
+                                # Bot Detection Logic for Transition Loop (v12.4.2)
+                                err_text = status.lower() if status.startswith("ERROR_MSG:") else ""
+                                if "unusual activity" in err_text or "help center" in err_text or "help canter" in err_text:
+                                    self.update_state("CRITICAL: Google detected unusual activity during Transition. Pausing for Cooldown...", "WARNING")
+                                    await asyncio.sleep(60) 
+                                    await page.reload()
+                                    await asyncio.sleep(10)
+                                    continue 
+
+                                self.update_state(f"Transition {i+1} {status}. Retrying...", "WARNING")
+                                continue
+                            except Exception as e:
+                                self.update_state(f"Transition Bridge Error: {e}. Retrying...", "WARNING")
+                                await asyncio.sleep(2.0)
                     
                     await asyncio.sleep(5.0) # Break between bridges
             await context.close()

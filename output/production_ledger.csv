@@ -48,3 +48,12 @@ RUN_260423191635,2026-04-23 19:16:35,2026-04-23-19-16_type2.json,จัดกา
 RUN_260423191712,2026-04-23 19:17:12,2026-04-23-19-17_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/455c2a42-95da-4228-8ec4-eee516ca558b,FAIL
 RUN_260423192222,2026-04-23 19:22:22,2026-04-23-19-22_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/4b6d0e51-3915-4cb0-9015-82c8f53d9afc,FAIL
 RUN_260423193815,2026-04-23 19:38:15,2026-04-23-19-38_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/7f7768d4-9752-4a63-b6a9-a21031db43df,COMPLETE
+RUN_260423225111,2026-04-23 22:51:11,2026-04-23-22-50_type2_test2scene.json,จัดการฝุ่นยังไงดีนะ,1,4,2,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/3f9aa931-a826-452a-8605-5662d755d03a,ERROR (Crashed)
+RUN_260423231809,2026-04-23 23:18:09,2026-04-23-23-18_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/94b48e1d-ee8f-43ad-8ca5-22789a18d9c6,COMPLETE
+RUN_260424000712,2026-04-24 00:07:12,2026-04-24-00-07_type2.json,จัดการฝุ่นยังไงดีนะ,1,16,8,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/6516b0cc-c8ca-43a2-98ae-03ca5dfdac35,FAIL
+RUN_260424014204,2026-04-24 01:42:04,2026-04-24-01-41_type3_4s_transition_10scene.json,transition_firsttry_8s-4s,2,4,2,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/c1f783fc-ee3f-4487-9b5c-b7262adfc18c,COMPLETE
+RUN_260424015606,2026-04-24 01:56:06,2026-04-24-01-55_type3_3scene_6-4.json,transition_firsttry_8s,1,6,3,ref_type2_ref.jpg,https://labs.google/fx/tools/flow/project/2bcb2081-5941-4985-b7f4-b19aefa050a3,FAIL
+RUN_260424015747,2026-04-24 01:57:47,2026-04-24-01-57_type3_3scene_6-4.json,transition_firsttry_8s,1,6,3,ref_ref_jsontype3.jpg,Initializing...,FAIL
+RUN_260424015813,2026-04-24 01:58:13,2026-04-24-01-57_type3_3scene_6-4.json,transition_firsttry_8s,1,6,3,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/a36f19a4-a3c7-4998-ba29-a08dfb17cc81,COMPLETE
+RUN_260424022932,2026-04-24 02:29:32,2026-04-24-02-29_type3_10secene_6-4(1s).json,transition_firsttry_8s,1,20,10,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/95ea91d8-45b9-4d12-8142-3f953989e778,ERROR
+RUN_260424025542,2026-04-24 02:55:42,2026-04-24-02-55_type3_5scene_6-4(1s).json,transition_firsttry_8s,1,10,5,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/09569187-9c19-4a6b-b271-82e3f689509c,COMPLETE

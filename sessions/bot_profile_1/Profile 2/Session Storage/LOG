@@ -1,13 +1,11 @@
-2026/04/23-19:38:16.299 23e24 Reusing MANIFEST C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile_1\Profile 2\Session Storage/MANIFEST-000001
-2026/04/23-19:38:16.300 23e24 Recovering log #3
-2026/04/23-19:38:16.300 23e24 Level-0 table #3: started
-2026/04/23-19:38:16.306 23e24 Level-0 table #3: 3845 bytes OK
-2026/04/23-19:38:16.310 23e24 Recovering log #4
-2026/04/23-19:38:16.314 23e24 Reusing old log C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile_1\Profile 2\Session Storage/000004.log 
-2026/04/23-19:38:16.320 23e24 Delete type=0 #3
-2026/04/23-19:45:17.244 29904 Level-0 table #6: started
-2026/04/23-19:45:17.249 29904 Level-0 table #6: 50868 bytes OK
-2026/04/23-19:45:17.252 29904 Delete type=0 #4
-2026/04/23-20:09:17.234 29904 Level-0 table #8: started
-2026/04/23-20:09:17.238 29904 Level-0 table #8: 59325 bytes OK
-2026/04/23-20:09:17.241 29904 Delete type=0 #5
+2026/04/24-02:55:43.614 15a54 Reusing MANIFEST C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile_1\Profile 2\Session Storage/MANIFEST-000001
+2026/04/24-02:55:43.615 15a54 Recovering log #3
+2026/04/24-02:55:43.615 15a54 Level-0 table #3: started
+2026/04/24-02:55:43.634 15a54 Level-0 table #3: 3845 bytes OK
+2026/04/24-02:55:43.634 15a54 Recovering log #13
+2026/04/24-02:55:43.638 15a54 Reusing old log C:\Users\com\Documents\AI_VID_projects\vid_studio\sessions\bot_profile_1\Profile 2\Session Storage/000013.log 
+2026/04/24-02:55:43.643 15a54 Delete type=0 #3
+2026/04/24-02:55:43.643 15a54 Delete type=2 #14
+2026/04/24-03:11:44.858 18cf0 Level-0 table #15: started
+2026/04/24-03:11:44.863 18cf0 Level-0 table #15: 62970 bytes OK
+2026/04/24-03:11:44.867 18cf0 Delete type=0 #13

@@ -238,5 +238,116 @@
         "added_at": "Thu Apr 23 19:38:13 2026",
         "worker": "1",
         "completed_at": "2026-04-23 20:20"
+    },
+    {
+        "id": "JOB_1776961087",
+        "config": {
+            "storyboard_path": "uploads\\storyboards\\2026-04-23-23-18_type2.json",
+            "choices": {},
+            "watch_mode": true,
+            "extra_schema": {},
+            "ref_image_path": "C:\\Users\\com\\Documents\\AI_VID_projects\\vid_studio\\uploads\\ref_type2_ref.jpg",
+            "creation_mode": "REGULAR",
+            "surveillance_enabled": true
+        },
+        "status": "COMPLETE",
+        "added_at": "Thu Apr 23 23:18:07 2026",
+        "worker": "1",
+        "completed_at": "2026-04-23 23:53"
+    },
+    {
+        "id": "JOB_1776969720",
+        "config": {
+            "storyboard_path": "uploads\\storyboards\\2026-04-24-01-41_type3_4s_transition_10scene.json",
+            "choices": {
+                "video_duration": "8",
+                "transition_duration": "4"
+            },
+            "watch_mode": true,
+            "extra_schema": {},
+            "ref_image_path": "C:\\Users\\com\\Documents\\AI_VID_projects\\vid_studio\\uploads\\ref_ref_jsontype3.jpg",
+            "creation_mode": "REGULAR",
+            "surveillance_enabled": true
+        },
+        "status": "COMPLETE",
+        "added_at": "Fri Apr 24 01:42:00 2026",
+        "worker": "1",
+        "completed_at": "2026-04-24 01:52"
+    },
+    {
+        "id": "JOB_1776970662",
+        "config": {
+            "storyboard_path": "uploads\\storyboards\\2026-04-24-01-57_type3_3scene_6-4.json",
+            "choices": {
+                "video_duration": "6",
+                "transition_duration": "4"
+            },
+            "watch_mode": true,
+            "extra_schema": {},
+            "ref_image_path": "C:\\Users\\com\\Documents\\AI_VID_projects\\vid_studio\\uploads\\ref_ref_jsontype3.jpg",
+            "creation_mode": "REGULAR",
+            "surveillance_enabled": true
+        },
+        "status": "FAILED",
+        "added_at": "Fri Apr 24 01:57:42 2026",
+        "worker": "1",
+        "failed_at": "2026-04-24 01:57"
+    },
+    {
+        "id": "JOB_1776970689",
+        "config": {
+            "storyboard_path": "uploads\\storyboards\\2026-04-24-01-57_type3_3scene_6-4.json",
+            "choices": {
+                "video_duration": "6",
+                "transition_duration": "4"
+            },
+            "watch_mode": true,
+            "extra_schema": {},
+            "ref_image_path": "C:\\Users\\com\\Documents\\AI_VID_projects\\vid_studio\\uploads\\ref_ref_jsontype3.jpg",
+            "creation_mode": "REGULAR",
+            "surveillance_enabled": true
+        },
+        "status": "COMPLETE",
+        "added_at": "Fri Apr 24 01:58:09 2026",
+        "worker": "1",
+        "completed_at": "2026-04-24 02:13"
+    },
+    {
+        "id": "JOB_1776972570",
+        "config": {
+            "storyboard_path": "uploads\\storyboards\\2026-04-24-02-29_type3_10secene_6-4(1s).json",
+            "choices": {
+                "video_duration": "6",
+                "transition_duration": "4"
+            },
+            "watch_mode": true,
+            "extra_schema": {},
+            "ref_image_path": "C:\\Users\\com\\Documents\\AI_VID_projects\\vid_studio\\uploads\\ref_ref_jsontype3.jpg",
+            "creation_mode": "REGULAR",
+            "surveillance_enabled": true
+        },
+        "status": "ERROR",
+        "added_at": "Fri Apr 24 02:29:30 2026",
+        "worker": "1",
+        "failed_at": "2026-04-24 02:49"
+    },
+    {
+        "id": "JOB_1776974136",
+        "config": {
+            "storyboard_path": "uploads\\storyboards\\2026-04-24-02-55_type3_5scene_6-4(1s).json",
+            "choices": {
+                "video_duration": "6",
+                "transition_duration": "4"
+            },
+            "watch_mode": true,
+            "extra_schema": {},
+            "ref_image_path": "C:\\Users\\com\\Documents\\AI_VID_projects\\vid_studio\\uploads\\ref_ref_jsontype3.jpg",
+            "creation_mode": "REGULAR",
+            "surveillance_enabled": false
+        },
+        "status": "COMPLETE",
+        "added_at": "Fri Apr 24 02:55:36 2026",
+        "worker": "1",
+        "completed_at": "2026-04-24 03:21"
     }
 ]
