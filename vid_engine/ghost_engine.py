@@ -268,10 +268,21 @@ class GhostEngine:
                 
                 content = await asset.inner_text()
                 
-                # --- PHASE 1: PROGRESS DETECTION (v12.2.4) ---
+                # --- PHASE 1: FATAL ERROR DETECTION (Pre-emptive) ---
+                # Check for critical error messages that should abort immediately even if a % is present.
+                # This catches "Oops", "Something went wrong", and "Unusual Activity" overlays.
+                fatal_signals = [
+                    "something went wrong", "unusual activity", "help center", "violation", 
+                    "policies", "harmful content", "oops", "unexpected", "unable to generation",
+                    "try again"
+                ]
+                if any(sig in content.lower() for sig in fatal_signals):
+                    self.update_state(f"Critical Error Detected on Asset {index}.", "WARNING")
+                    return f"ERROR_MSG:{content}"
+
+                # --- PHASE 2: PROGRESS DETECTION (v12.2.4) ---
                 # Check for percentage text overlay (e.g. "50%", "100%")
-                # We check this FIRST because the UI contains hidden 'Failed'/'Delete' buttons during upload.
-                # As long as a percentage is present, it is actively rendering.
+                # If a percentage is present and no FATAL error is found, it is actively rendering.
                 percentage_match = re.search(r'\d+\s?%', content)
                 
                 if percentage_match:
@@ -279,21 +290,17 @@ class GhostEngine:
                     await asyncio.sleep(5) # Poll every 5 seconds
                     continue
 
-                # --- PHASE 2: FAILURE DETECTION ---
-                # Only check for errors if no progress percentage is visible.
-                # Includes specific policy/upload violation signals (v12.2.6).
+                # --- PHASE 3: FINAL FAILURE DETECTION (Percentage is gone) ---
+                # We check this only after the percentage is gone to avoid false positives from background UI elements.
                 error_signals = [
-                    "something went wrong", "failed", "fail to", "error", 
-                    "unable to generation", "unusual activity", "help center", "noted some",
-                    "violate", "policies", "harmful content", "different prompt",
-                    "different image", "do not allow", "minors", "violation",
-                    "help canter", "unusual activity"
+                    "failed", "fail to", "error", "problem", "policy", 
+                    "noted some", "violate", "do not allow", "minors", "can't"
                 ]
                 if any(sig in content.lower() for sig in error_signals):
                     self.update_state(f"Error Detected: Rendering Failure on Asset {index}.", "WARNING")
                     return f"ERROR_MSG:{content}"
                 
-                # --- PHASE 3: COMPLETION ---
+                # --- PHASE 4: COMPLETION ---
                 self.update_state(f"Asset {index} is READY.", "ANCHORING")
                 return "READY"
                 

@@ -57,3 +57,5 @@ RUN_260424015747,2026-04-24 01:57:47,2026-04-24-01-57_type3_3scene_6-4.json,tran
 RUN_260424015813,2026-04-24 01:58:13,2026-04-24-01-57_type3_3scene_6-4.json,transition_firsttry_8s,1,6,3,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/a36f19a4-a3c7-4998-ba29-a08dfb17cc81,COMPLETE
 RUN_260424022932,2026-04-24 02:29:32,2026-04-24-02-29_type3_10secene_6-4(1s).json,transition_firsttry_8s,1,20,10,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/95ea91d8-45b9-4d12-8142-3f953989e778,ERROR
 RUN_260424025542,2026-04-24 02:55:42,2026-04-24-02-55_type3_5scene_6-4(1s).json,transition_firsttry_8s,1,10,5,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/09569187-9c19-4a6b-b271-82e3f689509c,COMPLETE
+RUN_260424084622,2026-04-24 08:46:22,2026-04-24-08-45_type3_10scene_6-4(4s).json,mali_cleaner_v6s_t4s,2,20,10,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/9629be9b-16ee-4803-991e-5c93c893ab04,FAIL
+RUN_260424092202,2026-04-24 09:22:02,2026-04-24-09-21_type3_10scene_6-4(4s).json,mali_cleaner_v6s_t4s,2,20,10,ref_ref_jsontype3.jpg,https://labs.google/fx/tools/flow/project/230cb89c-d1c8-4651-a595-3b51a9efb227,ERROR
