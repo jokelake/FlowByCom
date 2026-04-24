@@ -34,7 +34,19 @@ output/
 engine_state*.json
 temp_run_config.json
 marathon_queue.json
+Minion_*.json
+Mission_*.json
+*.json
+!run_configs/*.json
+!package.json
 *.log
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.mp4
+*.mov
 
 # --- IDEs ---
 .vscode/

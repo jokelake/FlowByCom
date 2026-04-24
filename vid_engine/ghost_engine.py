@@ -578,30 +578,73 @@ class GhostEngine:
             
             page = context.pages[0] if context.pages else await context.new_page()
             
-            # --- STARTUP & GALLERY ESCAPE ---
+            # --- STARTUP & GALLERY ESCAPE (v12.3.0 Robustness Update) ---
             # --- STEP 1: Main Gallery -> New Project ---
-            await page.goto("https://labs.google/fx/tools/flow", wait_until="networkidle", timeout=60000)
-            self.update_state("Entering Google Flow Workspace...", "STARTUP")
-            
-            # Dismiss Overlapping Banners/Modals (Human-like patient clicks)
-            for _ in range(2):
+            for startup_attempt in range(2):
                 try:
-                    close_btn = page.locator('button:has(i:text-is("close")), button[aria-label="Close"], button[aria-label="Dismiss"]').first
-                    if await close_btn.is_visible():
-                        await self.click_stealth(page, close_btn)
-                        await page.wait_for_timeout(1000)
-                except: break
+                    await page.goto("https://labs.google/fx/tools/flow", wait_until="domcontentloaded", timeout=60000)
+                    self.update_state(f"Entering Google Flow Workspace (Attempt {startup_attempt+1}/2)...", "STARTUP")
+                    
+                    # Wait for initial render
+                    await asyncio.sleep(5)
+                    
+                    # Dismiss Overlapping Banners/Modals (Expanded Detection)
+                    modal_selectors = [
+                        'button:has(i:text-is("close"))', 
+                        'button[aria-label="Close"]', 
+                        'button[aria-label="Dismiss"]',
+                        'button:has-text("Accept")',
+                        'button:has-text("Get started")',
+                        'button:has-text("Got it")',
+                        'button:has-text("Enter")'
+                    ]
+                    for sel in modal_selectors:
+                        try:
+                            loc = page.locator(sel).first
+                            if await loc.is_visible():
+                                await self.click_stealth(page, loc)
+                                await asyncio.sleep(1)
+                        except: continue
 
-            # Force Project Entry
-            if "/project/" not in page.url:
-                new_project_btn = page.locator('button:has-text("New project")').first
-                await new_project_btn.wait_for(state="visible", timeout=30000)
-                self.update_state("Creating New Project Canvas...", "STARTUP")
-                await self.click_stealth(page, 'button:has-text("New project")')
-                await page.wait_for_url("**/project/**", timeout=45000)
-                # self.flow_project_url = page.url # Capture deep-link
-                self.flow_project_url = page.url # Capture deep-link
-                await page.wait_for_timeout(5000) # Let canvas settle
+                    # Force Project Entry
+                    if "/project/" not in page.url:
+                        # Check for various forms of the "New project" button
+                        new_project_selectors = [
+                            'button:has-text("New project")',
+                            'button:has-text("Create project")',
+                            '[role="button"]:has-text("New project")',
+                            'button:has-text("Start generating")'
+                        ]
+                        
+                        found = False
+                        for sel in new_project_selectors:
+                            btn = page.locator(sel).first
+                            try:
+                                await btn.wait_for(state="visible", timeout=8000)
+                                self.update_state("Creating New Project Canvas...", "STARTUP")
+                                await self.click_stealth(page, btn)
+                                await page.wait_for_url("**/project/**", timeout=30000)
+                                found = True
+                                break
+                            except: continue
+                        
+                        if not found:
+                            if startup_attempt == 0:
+                                self.update_state("Dashboard button not found. Retrying startup...", "WARNING")
+                                await page.reload()
+                                continue
+                            else:
+                                raise Exception("Could not find 'New project' entry point.")
+                    
+                    # Success!
+                    self.flow_project_url = page.url
+                    await page.wait_for_timeout(5000) # Let canvas settle
+                    break 
+                    
+                except Exception as e:
+                    if startup_attempt == 1: raise e
+                    self.update_state(f"Startup Warning: {e}. Retrying...", "WARNING")
+                    await asyncio.sleep(5)
 
             # 3. Handle 'Loading Project' Splash Screen
             self.update_state("Waiting for Production Canvas to initialize...", "STARTUP")
