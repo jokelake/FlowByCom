@@ -674,6 +674,8 @@ class GhostEngine:
                     
                     if attempt > 1:
                         self.update_state(f"Recovery Refresh (Attempt {attempt})...", "WARNING")
+                        await page.reload()
+                        await page.wait_for_load_state("networkidle")
                         await asyncio.sleep(5.0) # Requested 5s wait
                         await self.set_flow_options(page, mode="IMAGE")
 

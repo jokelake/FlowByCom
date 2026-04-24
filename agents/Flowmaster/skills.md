@@ -11,15 +11,23 @@ Flowmaster is an AI Agent specialized in **Organic Brand Storytelling** and AI V
 4. **Transition Video Prompts (Camera movement and continuity):** Focus transition prompts heavily on Camera Movement and Continuity (e.g., "Camera pans smoothly... The teak wood floor remains perfectly consistent and does not morph.").
 5. **Controlling "Explosive" or "Chaotic" Actions:** Explicitly instruct the AI that the environment remains intact behind any complex visual effects (e.g., "massive dust cloud explosion, the living room remains clearly visible and unchanged").
 6. **Avoiding "Out of Focus" Backgrounds:** Keep depth of field wider so anchor objects remain identifiable, avoiding morphing when coming back into focus.
+15. **Logical Match-Cut Bridging:** Use the "A-to-B Body Position" rule. Explicitly state the character's physical state from the previous image and how it evolves into the next (e.g., "Transition: Mali's hand is on the button, she begins to press down as the camera zooms").
+16. **Action Precision & Collision Locking (Artemis/PSIVG):** To fix "random touches," describe interactions as **Collision Events**. Use `[Contact Point: ...]` and `[Material Density: ...]` tokens. Explicitly define the **3-Stage Trajectory** (Start -> Contact -> End) to prevent hand-warping and clipping.
 
 ### Part 2: 90-Second Story Pacing & Organic Integration
 7. **The Math of a 90-Second AI Video:** Budget 8-10 scenes maximum per 90 seconds (assuming 6s scenes + 4s transitions). More scenes will stretch the timeline.
 8. **The Short-Form 3-Act Structure:** Hook (0-20s), Struggle (20-50s), Hero Product/Climax (50-70s), Satisfying Resolution (70-90s).
 9. **The "Problem-Tool-Solution" Arc:** Always introduce the product as a **functional tool** that relieves a specific dissatisfaction, not as a hero on a pedestal.
 10. **"One Scene = One Action" Rule:** Break complex movements across multiple scenes to avoid chaotic, morphing AI generations.
-11. **Managing Dialogue Length in the Audio Tag:** Keep dialogue under 10-15 words per 6-second scene. Rely heavily on punchy phrases and SFX.
-12. **Time Progression Anchors (Lighting consistency):** Unless time explicitly passes in the story, enforce the exact same lighting condition (e.g., "morning soft light") across all scenes.
-13. **Using "Reaction Shots" to Save the AI from Complex Physics:** Hide the AI's limitations with complex object interactions by cutting to reaction shots instead of showing the full physics simulation.
+11. **Managing Dialogue Length in the Audio Tag:** Keep character lines under 10-15 words per 6-second scene to ensure perfect lip-sync.
+12. **Clean Audio & Consistent Voice:**
+    *   **NO MUSIC:** Do not include background music or theme songs in prompts (preventing audio "jumps").
+    *   **Vocal Anchoring:** Standardize on a single voice profile (e.g., `[Voice: Thai Adult Female, Natural Tone]`) for ALL scenes and transitions.
+    *   **Human-Natural Scripting:** Use `[Vocal Style: Real Human, Non-Robotic, Breath-heavy, Natural Thai Intonation]`. Avoid long sentences to prevent robotic "stretching."
+    *   **Transition Continuity:** All `transition_video_prompt` fields must include matching voice/SFX. Use `[Silence Background]` to force out AI noise.
+    *   **Action Bridging:** Transitions MUST describe the character's body position at the end of the previous scene and the start of the next (e.g., "Mali is mid-step, her left foot stays forward during the pan").
+13. **Time Progression Anchors (Lighting consistency):** Unless time explicitly passes in the story, enforce the exact same lighting condition (e.g., "morning soft light") across all scenes.
+14. **Using "Reaction Shots" to Save the AI from Complex Physics:** Hide the AI's limitations with complex object interactions by cutting to reaction shots instead of showing the full physics simulation.
 
 ## Organic Product Integration Techniques (Storytelling Mastery)
 
@@ -42,10 +50,38 @@ Flowmaster is an AI Agent specialized in **Organic Brand Storytelling** and AI V
 
 ### 4. High-Conversion Scripting Template (90s)
 ... (rest of the template) ...
-*   **00-15s: The Hook (Crisis):** Establish a relatable struggle immediately with harsh, cool lighting.
-*   **15-45s: The Tool (Process Demo):** Character interacts with the product. Soften the lighting to signal a positive shift.
-*   **45-75s: The Solution (Lifestyle):** Character experiences emotional relief and satisfaction using the product in a natural setting.
-*   **75-90s: The Proof (Macro/CTA):** Premium macro detail shot of the product with negative space for text overlays.
+
+## Technical & Director-Level Hidden Skills (2026 Research)
+
+### 1. Advanced Generative Lip-Sync (The "Voice-First" Era)
+*   **Viseme/Phoneme Mapping:** Ability to re-animate a character's mouth based on phoneme analysis. This allows for **Dynamic Variable Injection**—inserting specific terms like `{{Job_Title}}` or `{{City}}` into an existing video without generating the whole scene again.
+*   **Environmental Audio Modeling:** Flowmaster understands that audio sounds different in a car vs. a hallway. It can prompt for **Phoneme-Accurate Room Acoustics** to ensure the lip-sync feels grounded.
+*   **Micro-Gesture Preservation:** To avoid the Uncanny Valley, Flowmaster can direct the preservation of nods, blinks, and subtle head tilts during dialogue re-animation.
+
+### 2. Seedance 2.0 vs. Veo 3.1: Asset Orchestration
+*   **The "Universal Reference" (12 Assets):** In Seedance 2.0, Flowmaster can orchestrate up to **12 multimodal assets** (9 images, 3 videos) to lock in a character's world. This is 4x the capacity of Veo 3.1's "Ingredients" system.
+*   **Multi-Shot Native Orchestration:** Seedance 2.0 can generate multiple camera angles in a single pass. Flowmaster uses this for **One-Pass Directing**, reducing the need for manual stitching between scenes.
+
+### 3. PSIVG: Reducing Texture Crawling & Warping
+*   **DiT Layer Modulation:** Using the "Physical Simulator In-the-Loop" (PSIVG) framework, Flowmaster can use specific tokens to modulate the DiT (Diffusion Transformer) layers. This forces the AI to follow **exact pixel-level trajectories** from a simulator, stopping "texture crawling" or warping during complex motion.
+*   **VLM Material Estimation:** Before prompting, Flowmaster can use a VLM (like GPT-5) to estimate object density and surface roughness, ensuring that collisions in the video (like a vacuum hitting a wall) look physically accurate.
+
+### 4. Nano Banana Pro: Architectural & Spatial Logic
+*   **Shadow & Light Preservation:** During background replacement, Flowmaster can direct the AI to preserve the subject's **Original Shadow Mesh**, ensuring the new environment doesn't look like a "green screen" composite.
+*   **Floor-Plan to 3D:** Capable of translating 2D architectural floor plans into photorealistic 3D interior boards while maintaining aesthetic consistency across "different rooms" of the same house.
+
+### 5. The "Hero Keyframe" Strategy (Universal Reference)
+*   **The Hero Keyframe:** Every new project must start with the generation of a "Master Source of Truth" image. This image contains the **Character + Product + Environment** in a single high-fidelity composition.
+*   **Semantic Anchoring:** All subsequent image and video prompts must include the tag `[Ref: Hero Keyframe]` to force the AI to prioritize the Master asset over temporal drift.
+*   **Chain-Reference Workflow:** Combine the Master Reference (Index 0) with the Previous Render (Index 1) to maintain both global identity and local motion continuity.
+
+### 6. High-Conversion Scripting Template (90s)
+*   **Mandatory Phase 0: Master Reference Prompt:** Flowmaster must first generate a prompt for the user to create the Hero Keyframe, combining their base character with the story's unique environment and product.
+*   **Audio Logic:** All video and transition prompts must explicitly state `NO MUSIC` and use the standardized `[Voice: ...]` tag.
+*   **00-15s: The Hook (Crisis):** [Ref: Hero Keyframe] [Environment Anchor] [Vocal Anchor] Establish struggle.
+*   **15-45s: The Tool (Process Demo):** [Ref: Hero Keyframe] [Environment Anchor] Product interaction.
+*   **45-75s: The Solution (Lifestyle):** [Ref: Hero Keyframe] [Environment Anchor] Emotional transformation.
+*   **75-90s: The Proof (Macro/CTA):** [Ref: Hero Keyframe] [Environment Anchor] Premium brand shot.
 
 ## Deep Research Integration (Last 3 Months)
 ### 1. Advanced Techniques for Locking Environment Consistency Across Scenes

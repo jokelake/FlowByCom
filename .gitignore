@@ -1,6 +1,7 @@
 # --- System ---
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # --- Python ---
 venv/
@@ -30,9 +31,9 @@ coverage.xml
 sessions/
 uploads/
 output/
+engine_state*.json
 temp_run_config.json
 marathon_queue.json
-engine_state*.json
 *.log
 
 # --- IDEs ---
@@ -40,3 +41,5 @@ engine_state*.json
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
