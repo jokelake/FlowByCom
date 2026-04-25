@@ -48,6 +48,15 @@ This file contains the "Source of Truth" prompts for all Minion missions. Genera
 ---
 *Last updated: 2026-04-25*
 
+## 🌀 [M-007] Chrono-Banana Hide-and-Seek [LOOP]
+*Focus: Infinite video looping and time-warp effects.*
+
+**Dual-Hero (Kevin & Bob)**
+> `[Pixar 3D Animation Style] [Full Body Shot] [Characters: Kevin (Tall) and Bob (Short)] Kevin is leaning against a wall counting, Bob is sneaking behind him with a glowing blue banana. High-fidelity textures, 8k resolution.`
+
+**Environment (The Prop Room)**
+> `[Pixar 3D Animation Style] [Environment: The Prop Room] A dark room filled with floating futuristic crates and glowing motherboard-panels. One wall is covered in glowing blue fiber-optic circuits. Soft ambient blue and yellow lighting. Cinematic wide angle.`
+
 ## 🤝 [M-006] The Great Cable Heave
 *Focus: Two-character coordination and slapstick.*
 
