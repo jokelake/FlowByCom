@@ -163,7 +163,8 @@ class ProductionConfig(BaseModel):
     choices: dict
     watch_mode: bool = False
     extra_schema: dict = {}
-    ref_image_path: str = None
+    ref1_path: str = None
+    ref2_path: str = None
     creation_mode: str = "REGULAR" 
     surveillance_enabled: bool = True # v10.4.2
 
@@ -185,7 +186,8 @@ def start_production(config: ProductionConfig, worker_id: str = "1"):
     run_config = {
         "choices": config.choices,
         "extra_schema": config.extra_schema,
-        "ref_image_path": config.ref_image_path,
+        "ref1_path": config.ref1_path,
+        "ref2_path": config.ref2_path,
         "creation_mode": config.creation_mode,
         "surveillance_enabled": config.surveillance_enabled
     }

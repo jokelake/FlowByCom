@@ -617,22 +617,37 @@
 
         <!-- Step 1.5: Reference Image (revealed after analysis) -->
         <div id="referenceSection" class="section" style="display: none; border: 2px dashed var(--primary); background: rgba(99, 102, 241, 0.05); transition: all 0.3s ease;">
-            <span class="label">🌟 Step 1.5: Upload Starting Reference (Optional)</span>
+            <span class="label">🌟 Step 1.5: Upload Starting References (Dual-Ref v12.5)</span>
             <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.8rem;">
-                Set the starting visual for Scene 1 to ensure character consistency.
+                Upload <b>Environment</b> (Ref 1) and <b>Character</b> (Ref 2) to lock the visual DNA.
             </p>
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <label class="btn-primary" style="width: auto; background: #334155; padding: 0.5rem 1rem; font-size: 0.8rem; cursor: pointer;">
-                    📁 Choose Reference Image
-                    <input type="file" id="refImage" accept="image/*" onchange="uploadReference()" style="display: none;">
-                </label>
-                <div id="refPreview" style="display: none; position: relative;">
-                    <img id="previewImg" src="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem; border: 2px solid var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);">
-                    <div id="readyBadge" style="display: none; position: absolute; bottom: -5px; right: -5px; background: #34d399; color: #0f172a; font-size: 10px; padding: 2px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #0f172a;">READY</div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Ref 1: Environment -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <label class="btn-primary" style="width: auto; background: #1e293b; padding: 0.5rem 1rem; font-size: 0.75rem; cursor: pointer; border: 1px solid #334155;">
+                        🏞️ Choose Environment (Ref 1)
+                        <input type="file" id="refImage1" accept="image/*" onchange="uploadReference(1)" style="display: none;">
+                    </label>
+                    <div id="refPreview1" style="display: none; position: relative;">
+                        <img id="reviewimg1" src="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem; border: 2px solid #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);">
+                        <div style="position: absolute; bottom: -5px; right: -5px; background: #34d399; color: #0f172a; font-size: 8px; padding: 2px 4px; border-radius: 3px; font-weight: bold; border: 1px solid #0f172a;">REF 1</div>
+                    </div>
+                </div>
+
+                <!-- Ref 2: Character -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <label class="btn-primary" style="width: auto; background: #1e293b; padding: 0.5rem 1rem; font-size: 0.75rem; cursor: pointer; border: 1px solid #334155;">
+                        👤 Choose Character (Ref 2)
+                        <input type="file" id="refImage2" accept="image/*" onchange="uploadReference(2)" style="display: none;">
+                    </label>
+                    <div id="refPreview2" style="display: none; position: relative;">
+                        <img id="reviewimg2" src="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem; border: 2px solid #6366f1; box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);">
+                        <div style="position: absolute; bottom: -5px; right: -5px; background: #6366f1; color: white; font-size: 8px; padding: 2px 4px; border-radius: 3px; font-weight: bold; border: 1px solid #0f172a;">REF 2</div>
+                    </div>
                 </div>
             </div>
-            <div id="uploadStatus" style="font-size: 0.85rem; color: #fbbf24; margin-top: 0.7rem; font-weight: 600;">
-                Waiting for reference...
+            <div id="uploadStatus" style="font-size: 0.85rem; color: #fbbf24; margin-top: 1rem; font-weight: 600; padding: 0.5rem; background: rgba(0,0,0,0.3); border-radius: 0.5rem; text-align: center;">
+                Waiting for dual references...
             </div>
             
             <div id="videoConfigSection" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed rgba(99, 102, 241, 0.3); display: none;">
@@ -808,14 +823,16 @@
     <script>
         // --- SAFE INITIALIZATION (v10.3.5) ---
         let currentStoryboardPath = "";
-        let currentRefImagePath = "";
+        let currentRef1Path = "";
+        let currentRef2Path = "";
         let lastMessage = "";
         let discoveredSchema = {};
         let totalScenes = 0;
         
         try {
             currentStoryboardPath = localStorage.getItem('vid_storyboard') || "";
-            currentRefImagePath = localStorage.getItem('vid_ref_image') || "";
+            currentRef1Path = localStorage.getItem('vid_ref1') || "";
+            currentRef2Path = localStorage.getItem('vid_ref2') || "";
             totalScenes = parseInt(localStorage.getItem('vid_total_scenes')) || 0;
             discoveredSchema = JSON.parse(localStorage.getItem('vid_schema') || "{}");
         } catch (e) {
@@ -824,7 +841,8 @@
 
         function saveState() {
             localStorage.setItem('vid_storyboard', currentStoryboardPath);
-            localStorage.setItem('vid_ref_image', currentRefImagePath);
+            localStorage.setItem('vid_ref1', currentRef1Path);
+            localStorage.setItem('vid_ref2', currentRef2Path);
             localStorage.setItem('vid_schema', JSON.stringify(discoveredSchema));
             localStorage.setItem('vid_summary', document.getElementById('summaryDetails').innerHTML);
             localStorage.setItem('vid_mode', document.querySelector('input[name="creation_mode"]:checked')?.value || "REGULAR");
@@ -854,17 +872,18 @@
             const savedSurveillance = localStorage.getItem('vid_surveillance') !== 'false';
             document.getElementById('surveillanceMode').checked = savedSurveillance;
 
-            // Restore Ref Preview
-            if (currentRefImagePath && currentRefImagePath !== "null") {
-                const previewImg = document.getElementById('previewImg');
-                const previewDiv = document.getElementById('refPreview');
-                const refSection = document.getElementById('referenceSection');
-                
-                previewImg.src = "/uploads/" + currentRefImagePath.split(/[\\/]/).pop();
-                previewDiv.style.display = "block";
-                refSection.style.display = "block"; // [FIX] Force reveal section
-                document.getElementById('readyBadge').style.display = "block";
-                document.getElementById('uploadStatus').innerText = "✅ REFERENCE RESTORED";
+            // Restore Ref Previews
+            if (currentRef1Path && currentRef1Path !== "null") {
+                document.getElementById('reviewimg1').src = "/uploads/" + currentRef1Path.split(/[\\/]/).pop();
+                document.getElementById('refPreview1').style.display = "block";
+            }
+            if (currentRef2Path && currentRef2Path !== "null") {
+                document.getElementById('reviewimg2').src = "/uploads/" + currentRef2Path.split(/[\\/]/).pop();
+                document.getElementById('refPreview2').style.display = "block";
+            }
+            if (currentRef1Path || currentRef2Path) {
+                document.getElementById('referenceSection').style.display = "block";
+                document.getElementById('uploadStatus').innerText = "✅ REFERENCES RESTORED";
                 document.getElementById('uploadStatus').style.color = "#34d399";
             }
         }
@@ -974,15 +993,16 @@
         // Initialize on load
         window.onload = checkSession;
 
-        async function uploadReference() {
-            const fileInput = document.getElementById('refImage');
+        async function uploadReference(index) {
+            const inputId = `refImage${index}`;
+            const fileInput = document.getElementById(inputId);
             const statusDiv = document.getElementById('uploadStatus');
-            const previewDiv = document.getElementById('refPreview');
-            const previewImg = document.getElementById('previewImg');
+            const previewDiv = document.getElementById(`refPreview${index}`);
+            const previewImg = document.getElementById(`reviewimg${index}`);
 
             if (fileInput.files.length === 0) return;
 
-            statusDiv.innerText = "Uploading to Studio...";
+            statusDiv.innerText = `Uploading Ref ${index}...`;
             statusDiv.style.color = "#fbbf24";
 
             const formData = new FormData();
@@ -991,25 +1011,30 @@
             try {
                 const response = await fetch('/upload-ref', { method: 'POST', body: formData });
                 const data = await response.json();
-                currentRefImagePath = data.ref_image_path;
+                
+                if (index === 1) currentRef1Path = data.ref_image_path;
+                else currentRef2Path = data.ref_image_path;
 
-                // [FIX] Force reveal Step 2 Section immediately on success
+                // Force reveal sections
                 document.getElementById('referenceSection').style.display = "block";
                 document.getElementById('mappingSection').style.display = "block";
                 document.getElementById('videoConfigSection').style.display = "block";
                 
-                statusDiv.innerText = "✅ REFERENCE READY FOR PHASE 1";
-                statusDiv.style.color = "#34d399";
+                if (currentRef1Path && currentRef2Path) {
+                    statusDiv.innerText = "✅ DUAL REFERENCES SECURED";
+                    statusDiv.style.color = "#34d399";
+                } else {
+                    statusDiv.innerText = `✅ Ref ${index} Ready. Waiting for other...`;
+                }
 
-                // Show preview and Ready Badge
+                // Show preview
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     previewImg.src = e.target.result;
                     previewDiv.style.display = "block";
-                    document.getElementById('readyBadge').style.display = "block";
                 };
                 reader.readAsDataURL(fileInput.files[0]);
-                saveState(); // Persist anchor DNA
+                saveState();
             } catch (e) {
                 statusDiv.innerText = "❌ Upload Failed";
                 statusDiv.style.color = "#f43f5e";
@@ -1176,7 +1201,8 @@
                     transition_duration: transDur
                 },
                 watch_mode: document.getElementById('watchMode').checked,
-                ref_image_path: currentRefImagePath,
+                ref1_path: currentRef1Path,
+                ref2_path: currentRef2Path,
                 creation_mode: "REGULAR",
                 surveillance_enabled: document.getElementById('surveillanceMode').checked
             };
@@ -1326,27 +1352,32 @@
 
         function clearSetupForm() {
             currentStoryboardPath = "";
-            currentRefImagePath = "";
+            currentRef1Path = "";
+            currentRef2Path = "";
             totalScenes = 0;
             discoveredSchema = {};
             localStorage.removeItem('vid_storyboard');
-            localStorage.removeItem('vid_ref_image');
+            localStorage.removeItem('vid_ref1');
+            localStorage.removeItem('vid_ref2');
             localStorage.removeItem('vid_schema');
             localStorage.removeItem('vid_summary');
             localStorage.removeItem('vid_total_scenes');
             
             const storyboardFile = document.getElementById('storyboardFile');
             if(storyboardFile) storyboardFile.value = "";
-            const refImage = document.getElementById('refImage');
-            if(refImage) refImage.value = "";
+            const refImage1 = document.getElementById('refImage1');
+            if(refImage1) refImage1.value = "";
+            const refImage2 = document.getElementById('refImage2');
+            if(refImage2) refImage2.value = "";
             
             document.getElementById('summaryDetails').innerHTML = "Analyzing sequence details...";
             document.getElementById('mappingSection').style.display = "none";
             document.getElementById('referenceSection').style.display = "none";
-            document.getElementById('refPreview').style.display = "none";
-            document.getElementById('previewImg').src = "";
-            document.getElementById('readyBadge').style.display = "none";
-            document.getElementById('uploadStatus').innerText = "Waiting for reference...";
+            document.getElementById('refPreview1').style.display = "none";
+            document.getElementById('refPreview2').style.display = "none";
+            document.getElementById('reviewimg1').src = "";
+            document.getElementById('reviewimg2').src = "";
+            document.getElementById('uploadStatus').innerText = "Waiting for dual references...";
             document.getElementById('uploadStatus').style.color = "#fbbf24";
         }
 
